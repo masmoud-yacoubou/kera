@@ -1,26 +1,61 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-sora: "Sora", sans-serif;
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
+
+  /* ── Sahara Premium ── */
+  --color-fond:        #0E0B08;
+  --color-surface:     #1A1410;
+  --color-carte:       #251C14;
+  --color-bordure:     #3A2818;
+  --color-accent:      #D4522A;
+  --color-accent-soft: #D4522A26;
+  --color-or:          #C8A050;
+  --color-or-soft:     #C8A05020;
+  --color-succes:      #4A8A6A;
+  --color-succes-soft: #4A8A6A20;
+  --color-texte:       #F2E8D8;
+  --color-muted:       #9A8060;
+  --color-muted-soft:  #9A806040;
+
+  /* Graphiques */
+  --color-terracotta:  #D4522A;
+  --color-sage:        #4A8A6A;
+  --color-moutarde:    #C8A050;
+  --color-lavande:     #8B85C1;
+  --color-ardoise:     #6B8CAE;
+
+  /* Radius */
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Scrollbar premium */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3A2818 #1A1410;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+*::-webkit-scrollbar {
+  width: 6px;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+*::-webkit-scrollbar-track {
+  background: #1A1410;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #3A2818;
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #C8A050;
+}
+
+/* Sélection de texte */
+::selection {
+  background: #D4522A40;
+  color: #F2E8D8;
 }
