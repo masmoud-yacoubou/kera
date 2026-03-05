@@ -12,10 +12,7 @@ export type Category =
   | "Transport"
   | "Revenus";
 
-export type Currency =
-  | "€" | "$" | "£" | "CHF" | "CAD" | "JPY"
-  | "MAD" | "XOF" | "XAF" | "DZD" | "TND"
-  | "GHS" | "NGN" | "ZAR" | "AED";
+export type Currency = "XOF" | "EUR" | "USD";
 
 export type Theme = "light" | "dark";
 export type Lang = "fr" | "en";
@@ -72,21 +69,9 @@ export const CATEGORIES: Category[] = [
 ];
 
 export const CURRENCIES: { code: Currency; label: string; symbol: string }[] = [
-  { code: "€",   label: "Euro",           symbol: "€"   },
-  { code: "$",   label: "Dollar US",      symbol: "$"   },
-  { code: "£",   label: "Livre Sterling", symbol: "£"   },
-  { code: "CHF", label: "Franc Suisse",   symbol: "CHF" },
-  { code: "CAD", label: "Dollar CA",      symbol: "CA$" },
-  { code: "JPY", label: "Yen",            symbol: "¥"   },
-  { code: "MAD", label: "Dirham",         symbol: "MAD" },
-  { code: "XOF", label: "FCFA (UEMOA)",   symbol: "XOF" },
-  { code: "XAF", label: "FCFA (CEMAC)",   symbol: "XAF" },
-  { code: "DZD", label: "Dinar Algérien", symbol: "DZD" },
-  { code: "TND", label: "Dinar Tunisien", symbol: "TND" },
-  { code: "GHS", label: "Cedi Ghanéen",   symbol: "GH₵" },
-  { code: "NGN", label: "Naira",          symbol: "₦"   },
-  { code: "ZAR", label: "Rand",           symbol: "R"   },
-  { code: "AED", label: "Dirham UAE",     symbol: "AED" },
+  { code: "XOF", label: "Franc CFA", symbol: "FCFA" },
+  { code: "EUR", label: "Euro",      symbol: "€"    },
+  { code: "USD", label: "Dollar US", symbol: "$"    },
 ];
 
 /**
@@ -97,3 +82,6 @@ export const CURRENCIES: { code: Currency; label: string; symbol: string }[] = [
 export const getCurrencySymbol = (code: Currency): string => {
   return CURRENCIES.find(c => c.code === code)?.symbol || code;
 };
+
+
+

@@ -21,35 +21,30 @@ interface Props {
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: any[];
-  label?: string;
+  payload?: readonly any[];
+  label?: string | number;
+  formatAmount: (n: number) => string;
 }
 
-function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+function CustomTooltip({ active, payload, label, formatAmount }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
 
   return (
     <div
-      className="px-4 py-3 rounded-2xl border backdrop-blur-md shadow-2xl space-y-2"
+      className="px-3 py-2.5 rounded-xl text-sm space-y-1"
       style={{
-        background: "rgba(37, 28, 20, 0.95)",
-        borderColor: "#3A281860",
+        background: "#251C14",
+        border: "1px solid #3A2818",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
       }}
     >
-      <p className="text-[10px] font-black text-[#9A8060] uppercase tracking-[0.2em] border-bottom border-[#3A281830] pb-1">
-        {label}
-      </p>
-      {payload.map((p: any, index: number) => (
-        <div key={index} className="flex items-center justify-between gap-8">
-          <div className="flex items-center gap-2">
-            <div 
-              className="w-1.5 h-1.5 rounded-full" 
-              style={{ background: p.fill || p.color }} 
-            />
-            <span className="text-[#9A8060] text-[11px] font-medium">{p.name}</span>
-          </div>
-          <span className="text-[#F2E8D8] text-[11px] font-bold">
-            {p.value.toLocaleString('fr-FR')} €
+      <p className="text-[11px] text-[#9A8060] uppercase tracking-wider mb-2">{label}</p>
+      {payload.map((p) => (
+        <div key={p.name} className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full shrink-0" style={{ background: p.color }} />
+          <span className="text-[#9A8060] text-xs">{p.name}</span>
+          <span className="text-[#F2E8D8] text-xs font-semibold ml-auto pl-4">
+            {formatAmount(p.value)}
           </span>
         </div>
       ))}
@@ -57,7 +52,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   );
 }
 
-export default function BarChartWidget({ transactions}: Props) {
+export default function BarChartWidget({ transactions, formatAmount }: Props) {
   const data = groupByMonth(transactions);
   const maxVal = Math.max(...data.flatMap((d) => [d.income, d.expenses]), 1);
 
@@ -69,12 +64,9 @@ export default function BarChartWidget({ transactions}: Props) {
         border: "1px solid #3A281840",
       }}
     >
-      {/* Header avec bouton d'export ou détail simulé */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#C8A05008] border border-[#C8A05020]"
-          >
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#C8A05008] border border-[#C8A05020]">
             <BarChart2 size={16} className="text-[#C8A050]" />
           </div>
           <div>
@@ -88,7 +80,6 @@ export default function BarChartWidget({ transactions}: Props) {
           </div>
         </div>
 
-        {/* Légende minimaliste */}
         <div className="flex items-center gap-4 bg-[#0E0B08]/40 px-3 py-1.5 rounded-full border border-[#3A281820]">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-[#4A8A6A]" />
@@ -132,7 +123,7 @@ export default function BarChartWidget({ transactions}: Props) {
             />
             <YAxis hide domain={[0, maxVal * 1.2]} />
             <Tooltip
-              content={<CustomTooltip />}
+              content={(props) => <CustomTooltip {...props} formatAmount={formatAmount} />}
               cursor={{ fill: "rgba(200, 160, 80, 0.03)", radius: 12 }}
               animationDuration={200}
             />

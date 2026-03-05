@@ -55,16 +55,17 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
   return (
     <aside
-      className={cn(
-        "h-screen sticky top-0 flex flex-col transition-all duration-500 ease-in-out shrink-0 z-40",
-        isOpen ? "w-64" : "w-20"
-      )}
-      style={{
-        background: sidebarBg,
-        borderRight: "1px solid #3A281830",
-        boxShadow: "4px 0 24px rgba(0,0,0,0.4)",
-      }}
-    >
+  className={cn(
+    "h-screen sticky top-0 flex flex-col transition-[width] duration-200 ease-out shrink-0",
+    isOpen ? "w-56" : "w-16"
+  )}
+  style={{
+    background: "linear-gradient(180deg, #1C1610 0%, #161008 100%)",
+    borderRight: "1px solid #3A281820",
+    boxShadow: "4px 0 24px rgba(0,0,0,0.3)",
+    willChange: "width",
+  }}
+>
       {/* Logo Section */}
       <div
         className="flex items-center gap-3 px-5 py-6"

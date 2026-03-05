@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { UserPreferences, CURRENCIES } from "@/types";
 
@@ -61,31 +61,21 @@ export function usePreferences() {
   /**
    * Formate un montant numérique selon la devise choisie.
    * @param amount Le montant à formater
-   * @param showSign Si true, conserve le signe négatif (par défaut true)
    */
-  const formatAmount = useCallback((amount: number, showSign = true): string => {
-    const code = preferences?.currency ?? "EUR"; // Fallback de sécurité
+  const formatAmount = (amount: number): string => {
+    const code = preferences?.currency ?? "XOF";
     const currencyInfo = CURRENCIES.find((c) => c.code === code);
     const symbol = currencyInfo?.symbol ?? code;
 
-    const valueToFormat = showSign ? amount : Math.abs(amount);
-
-    // Utilisation de Intl pour un formatage propre (milliers, décimales)
     const formatted = new Intl.NumberFormat("fr-FR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(valueToFormat);
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(Math.abs(amount));
 
-    // Détermination intelligente de la position du symbole
-    // Liste extensible des devises avec préfixe
-    const prefixSymbols = ["$", "CA$", "¥", "£", "₦", "GH₵", "R", "US$"];
-    
-    if (prefixSymbols.includes(symbol)) {
-      return `${symbol}${formatted}`;
-    }
-    
+    const prefix = ["$"];
+    if (prefix.includes(symbol)) return `${symbol}${formatted}`;
     return `${formatted} ${symbol}`;
-  }, [preferences?.currency]);
+  };
 
   return {
     preferences,
