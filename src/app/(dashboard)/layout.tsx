@@ -5,8 +5,26 @@ import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import { TransactionsProvider } from "@/context/TransactionsContext";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+// ─────────────────────────────────────────────
+// Layout dashboard
+//
+// Gère l'état de la sidebar (ouvert/fermé)
+// et le distribue au Sidebar et au Header.
+//
+// Mobile  : sidebar fermée par défaut, s'ouvre
+//           en drawer via le bouton hamburger
+// Desktop : sidebar ouverte par défaut, rétractable
+// ─────────────────────────────────────────────
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // Fermée par défaut sur mobile, ouverte sur desktop
+  // La détection se fait dans Sidebar via CSS (hidden lg:flex)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 
   return (
     <TransactionsProvider>
@@ -15,18 +33,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         style={{
           background: "#0E0B08",
           backgroundImage: `
-            radial-gradient(ellipse at 0% 0%, #D4522A0A 0%, transparent 40%),
+            radial-gradient(ellipse at 0% 0%,   #D4522A0A 0%, transparent 40%),
             radial-gradient(ellipse at 100% 100%, #C8A05006 0%, transparent 40%)
           `,
         }}
       >
-        <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+        {/* Sidebar — sticky desktop / drawer mobile */}
+        <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
 
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header sidebarOpen={sidebarOpen} />
+        {/* Zone de contenu principale */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
+          {/* Header — reçoit le toggle pour le bouton hamburger */}
+          <Header sidebarOpen={sidebarOpen} onMenuToggle={toggleSidebar} />
+
+          {/* Contenu de la page */}
           <main
-            className="flex-1 p-6 overflow-auto"
+            className="flex-1 p-4 md:p-6 overflow-auto"
             style={{
               backgroundImage: `radial-gradient(ellipse at 50% 0%, #C8A05005 0%, transparent 60%)`,
             }}
