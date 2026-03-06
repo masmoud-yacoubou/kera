@@ -5,8 +5,24 @@ import { usePreferences } from "@/hooks/usePreferences";
 import { useTransactions } from "@/context/TransactionsContext";
 import { useAuth } from "@/hooks/useAuth";
 import { Currency, CURRENCIES } from "@/types";
-import { Check, Download, User, Settings2, Database, Info, Sun, Moon } from "lucide-react";
+import { Check, Download, User, Settings2, Database, Info } from "lucide-react";
 import { useTheme } from "next-themes";
+
+// ─────────────────────────────────────────────
+// Registre des thèmes disponibles
+// Pour ajouter un thème : ajouter une entrée ici
+// + le bloc CSS correspondant dans globals.css
+// ─────────────────────────────────────────────
+const THEMES = [
+  { value: "dark",         label: "Sahara",  variant: "Dark",  emoji: "🏜️" },
+  { value: "light",        label: "Sahara",  variant: "Light", emoji: "☀️" },
+  { value: "ocean-dark",   label: "Ocean",   variant: "Dark",  emoji: "🌊" },
+  { value: "ocean-light",  label: "Ocean",   variant: "Light", emoji: "🐚" },
+  { value: "sun-dark",     label: "Sun",     variant: "Dark",  emoji: "🌙" },
+  { value: "sun-light",    label: "Sun",     variant: "Light", emoji: "🍊" },
+] as const;
+
+type ThemeValue = typeof THEMES[number]["value"];
 
 // ─────────────────────────────────────────────
 // Style de carte réutilisable
@@ -37,62 +53,74 @@ function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }
 }
 
 // ─────────────────────────────────────────────
-// Sous-composant : toggle thème light / dark
-// Intégré dans la section Préférences
+// Sous-composant : sélecteur de thème
+//
+// Grille de cartes cliquables — une par thème.
+// Évolutif : ajouter une entrée dans THEMES suffit.
 // ─────────────────────────────────────────────
-function ThemeToggle() {
+function ThemeSelector() {
   const { theme, setTheme } = useTheme();
-  const isDark = theme === "dark";
 
   return (
-    <button
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label={isDark ? "Passer en mode clair" : "Passer en mode sombre"}
-      className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl transition-all min-h-[44px]"
-      style={{
-        background: "var(--fond-40)",
-        border: "1px solid var(--bordure-30)",
-      }}
-      onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--or-30)"}
-      onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--bordure-30)"}
+    <div
+      role="radiogroup"
+      aria-label="Choisir un thème"
+      className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3"
     >
-      {/* Icône */}
-      <div
-        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-        style={{
-          background: "var(--or-10)",
-          border: "1px solid var(--or-20)",
-        }}
-        aria-hidden="true"
-      >
-        {isDark
-          ? <Sun  size={16} style={{ color: "var(--or)" }} />
-          : <Moon size={16} style={{ color: "var(--or)" }} />
-        }
-      </div>
+      {THEMES.map((t) => {
+        const isActive = theme === t.value;
+        return (
+          <button
+            key={t.value}
+            role="radio"
+            aria-checked={isActive}
+            aria-label={`Thème ${t.label} ${t.variant}`}
+            onClick={() => setTheme(t.value)}
+            className="flex items-center gap-2.5 px-3 py-3 rounded-2xl transition-all min-h-[52px] text-left"
+            style={isActive ? {
+              background: "var(--accent-10)",
+              border: "1px solid var(--accent-20)",
+              boxShadow: "0 0 16px var(--accent-10)",
+            } : {
+              background: "var(--fond-40)",
+              border: "1px solid var(--bordure-30)",
+            }}
+          >
+            {/* Emoji */}
+            <span className="text-base leading-none shrink-0" aria-hidden="true">
+              {t.emoji}
+            </span>
 
-      {/* Labels */}
-      <div className="flex-1 text-left">
-        <p className="text-xs font-bold" style={{ color: "var(--texte)" }}>
-          {isDark ? "Mode clair" : "Mode sombre"}
-        </p>
-        <p className="text-[10px]" style={{ color: "var(--muted)" }}>
-          Thème Sahara {isDark ? "Light" : "Dark"}
-        </p>
-      </div>
+            {/* Labels */}
+            <div className="min-w-0">
+              <p
+                className="text-[10px] font-black uppercase tracking-tight leading-tight truncate"
+                style={{ color: isActive ? "var(--accent)" : "var(--texte)" }}
+              >
+                {t.label}
+              </p>
+              <p
+                className="text-[9px] font-bold uppercase tracking-widest opacity-60 truncate"
+                style={{ color: isActive ? "var(--accent)" : "var(--muted)" }}
+              >
+                {t.variant}
+              </p>
+            </div>
 
-      {/* Switch visuel */}
-      <div
-        className="w-10 h-6 rounded-full relative transition-colors duration-300 shrink-0"
-        style={{ background: isDark ? "var(--bordure)" : "var(--accent)" }}
-        aria-hidden="true"
-      >
-        <div
-          className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 shadow-sm"
-          style={{ left: isDark ? "4px" : "20px" }}
-        />
-      </div>
-    </button>
+            {/* Indicateur actif */}
+            {isActive && (
+              <div
+                className="ml-auto w-4 h-4 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: "var(--accent)" }}
+                aria-hidden="true"
+              >
+                <Check size={9} className="text-white" strokeWidth={3} />
+              </div>
+            )}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -105,7 +133,6 @@ export default function ParametresPage() {
   const { user } = useAuth();
   const [saved, setSaved] = useState(false);
 
-  // ── Mise à jour des préférences ──────────────
   const handleUpdate = async (
     updates: Partial<{ currency: Currency; month_start_day: number }>
   ) => {
@@ -114,7 +141,6 @@ export default function ParametresPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  // ── Export CSV côté client ───────────────────
   const exportCSV = () => {
     const header = "Date,Libellé,Catégorie,Type,Montant\n";
     const rows = transactions
@@ -164,7 +190,6 @@ export default function ParametresPage() {
             border: "1px solid var(--bordure-30)",
           }}
         >
-          {/* Avatar */}
           <div
             className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0"
             style={{ background: "var(--or-10)", border: "1px solid var(--or-20)" }}
@@ -174,8 +199,6 @@ export default function ParametresPage() {
               {user?.email?.substring(0, 2).toUpperCase() ?? "?"}
             </span>
           </div>
-
-          {/* Infos */}
           <div className="text-center sm:text-left min-w-0 w-full">
             <p
               className="text-xs sm:text-sm font-medium truncate"
@@ -201,15 +224,15 @@ export default function ParametresPage() {
       >
         <SectionHeader icon={<Settings2 size={17} />} title="Préférences d'affichage" />
 
-        {/* ── Toggle thème ──────────────────────── */}
-        <div className="space-y-2">
+        {/* ── Sélecteur de thème ────────────────── */}
+        <div className="space-y-3">
           <p
             className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em]"
             style={{ color: "var(--muted)" }}
           >
             Apparence
           </p>
-          <ThemeToggle />
+          <ThemeSelector />
         </div>
 
         {/* ── Devise ────────────────────────────── */}
@@ -254,9 +277,7 @@ export default function ParametresPage() {
                   >
                     {c.symbol}
                   </span>
-                  <span
-                    className="block text-[9px] sm:text-[10px] font-black uppercase tracking-tighter opacity-70"
-                  >
+                  <span className="block text-[9px] sm:text-[10px] font-black uppercase tracking-tighter opacity-70">
                     {c.code}
                   </span>
                   <span className="sr-only">{c.label}</span>
@@ -265,24 +286,15 @@ export default function ParametresPage() {
             })}
           </div>
 
-          {/* Note */}
           <div
             className="flex items-start gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-2xl"
-            style={{
-              background: "var(--or-08)",
-              border: "1px solid var(--or-15)",
-            }}
+            style={{ background: "var(--or-08)", border: "1px solid var(--or-15)" }}
             role="note"
           >
             <Info size={14} className="shrink-0 mt-0.5" style={{ color: "var(--or)" }} aria-hidden="true" />
-            <p
-              className="text-[10px] sm:text-[11px] leading-relaxed"
-              style={{ color: "var(--muted)" }}
-            >
+            <p className="text-[10px] sm:text-[11px] leading-relaxed" style={{ color: "var(--muted)" }}>
               Le changement de devise modifie uniquement le{" "}
-              <span className="font-bold" style={{ color: "var(--or)" }}>
-                symbole visuel
-              </span>.
+              <span className="font-bold" style={{ color: "var(--or)" }}>symbole visuel</span>.
               Aucune conversion automatique n&apos;est effectuée sur vos montants.
             </p>
           </div>
@@ -354,10 +366,7 @@ export default function ParametresPage() {
 
         <div
           className="p-4 sm:p-5 rounded-2xl"
-          style={{
-            background: "var(--fond-40)",
-            border: "1px solid var(--bordure-30)",
-          }}
+          style={{ background: "var(--fond-40)", border: "1px solid var(--bordure-30)" }}
         >
           <p
             className="text-[11px] sm:text-xs md:text-sm mb-4 sm:mb-5 leading-relaxed"
@@ -374,9 +383,7 @@ export default function ParametresPage() {
             className="w-full flex items-center justify-center gap-2.5 sm:gap-3 px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl text-white text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed min-h-[48px]"
             style={{
               background: "linear-gradient(135deg, var(--accent), #C04020)",
-              boxShadow: transactions.length > 0
-                ? "0 8px 24px var(--accent-20)"
-                : "none",
+              boxShadow: transactions.length > 0 ? "0 8px 24px var(--accent-20)" : "none",
             }}
           >
             <Download size={16} aria-hidden="true" />

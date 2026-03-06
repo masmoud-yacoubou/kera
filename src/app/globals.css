@@ -124,6 +124,207 @@
 }
 
 /* ─────────────────────────────────────────────
+   Thème Ocean Dark — Abysses marines
+   Bleu nuit profond, accent corail chaud
+───────────────────────────────────────────── */
+[data-theme="ocean-dark"] {
+  --fond:        #070D14;
+  --surface:     #0D1620;
+  --carte:       #101C2A;
+  --carte-2:     #0A1220;
+  --bordure:     #1E3448;
+
+  --accent:      #E06030;
+  --accent-soft: #E0603026;
+  --accent-10:   #E0603010;
+  --accent-15:   #E0603015;
+  --accent-20:   #E0603020;
+
+  --or:          #4AADCC;
+  --or-soft:     #4AADCC20;
+  --or-08:       #4AADCC08;
+  --or-10:       #4AADCC10;
+  --or-15:       #4AADCC15;
+  --or-20:       #4AADCC20;
+  --or-30:       #4AADCC30;
+
+  --succes:      #2E9E78;
+  --succes-soft: #2E9E7820;
+
+  --texte:       #D8EEF8;
+  --muted:       #5A88A8;
+  --muted-soft:  #5A88A840;
+
+  --fond-40:     rgba(7, 13, 20, 0.40);
+  --bordure-20:  rgba(30, 52, 72, 0.20);
+  --bordure-30:  rgba(30, 52, 72, 0.30);
+  --bordure-40:  rgba(30, 52, 72, 0.40);
+  --bordure-50:  rgba(30, 52, 72, 0.50);
+  --bordure-60:  rgba(30, 52, 72, 0.60);
+
+  --body-bg:     #070D14;
+  --body-radial-1: #E0603008;
+  --body-radial-2: #4AADCC06;
+
+  --scroll-track: #0D1620;
+  --scroll-thumb: #1E3448;
+  --scroll-hover: #4AADCC;
+
+  --selection-bg: #E0603040;
+}
+
+/* ─────────────────────────────────────────────
+   Thème Ocean Light — Côte méditerranéenne
+   Blanc écume, accent corail, tons azur doux
+───────────────────────────────────────────── */
+[data-theme="ocean-light"] {
+  --fond:        #F0F7FC;
+  --surface:     #E4F0F8;
+  --carte:       #FFFFFF;
+  --carte-2:     #EBF4FA;
+  --bordure:     #B8D4E8;
+
+  --accent:      #D05020;
+  --accent-soft: #D0502026;
+  --accent-10:   #D0502010;
+  --accent-15:   #D0502015;
+  --accent-20:   #D0502020;
+
+  --or:          #1A7A9A;
+  --or-soft:     #1A7A9A20;
+  --or-08:       #1A7A9A08;
+  --or-10:       #1A7A9A10;
+  --or-15:       #1A7A9A15;
+  --or-20:       #1A7A9A20;
+  --or-30:       #1A7A9A30;
+
+  --succes:      #1E7A58;
+  --succes-soft: #1E7A5820;
+
+  --texte:       #0A1C28;
+  --muted:       #4A7090;
+  --muted-soft:  #4A709040;
+
+  --fond-40:     rgba(240, 247, 252, 0.40);
+  --bordure-20:  rgba(184, 212, 232, 0.20);
+  --bordure-30:  rgba(184, 212, 232, 0.30);
+  --bordure-40:  rgba(184, 212, 232, 0.40);
+  --bordure-50:  rgba(184, 212, 232, 0.50);
+  --bordure-60:  rgba(184, 212, 232, 0.60);
+
+  --body-bg:     #F0F7FC;
+  --body-radial-1: #D0502008;
+  --body-radial-2: #1A7A9A06;
+
+  --scroll-track: #E4F0F8;
+  --scroll-thumb: #B8D4E8;
+  --scroll-hover: #1A7A9A;
+
+  --selection-bg: #D0502040;
+}
+
+/* ─────────────────────────────────────────────
+   Thème Sun Dark — Nuit méditerranéenne
+   Aubergine profond, accent orange soleil
+───────────────────────────────────────────── */
+[data-theme="sun-dark"] {
+  --fond:        #0E0810;
+  --surface:     #170F1C;
+  --carte:       #1C1224;
+  --carte-2:     #140C1A;
+  --bordure:     #362048;
+
+  --accent:      #F07020;
+  --accent-soft: #F0702026;
+  --accent-10:   #F0702010;
+  --accent-15:   #F0702015;
+  --accent-20:   #F0702020;
+
+  --or:          #E8B840;
+  --or-soft:     #E8B84020;
+  --or-08:       #E8B84008;
+  --or-10:       #E8B84010;
+  --or-15:       #E8B84015;
+  --or-20:       #E8B84020;
+  --or-30:       #E8B84030;
+
+  --succes:      #4A9E6A;
+  --succes-soft: #4A9E6A20;
+
+  --texte:       #F8EEF0;
+  --muted:       #9878A8;
+  --muted-soft:  #9878A840;
+
+  --fond-40:     rgba(14, 8, 16, 0.40);
+  --bordure-20:  rgba(54, 32, 72, 0.20);
+  --bordure-30:  rgba(54, 32, 72, 0.30);
+  --bordure-40:  rgba(54, 32, 72, 0.40);
+  --bordure-50:  rgba(54, 32, 72, 0.50);
+  --bordure-60:  rgba(54, 32, 72, 0.60);
+
+  --body-bg:     #0E0810;
+  --body-radial-1: #F0702010;
+  --body-radial-2: #E8B84008;
+
+  --scroll-track: #170F1C;
+  --scroll-thumb: #362048;
+  --scroll-hover: #E8B840;
+
+  --selection-bg: #F0702040;
+}
+
+/* ─────────────────────────────────────────────
+   Thème Sun Light — Citrus méditerranéen
+   Blanc chaud ivoire, accent orange vif
+───────────────────────────────────────────── */
+[data-theme="sun-light"] {
+  --fond:        #FFFBF0;
+  --surface:     #FFF4D8;
+  --carte:       #FFFFFF;
+  --carte-2:     #FFF8E8;
+  --bordure:     #E8D09A;
+
+  --accent:      #D85818;
+  --accent-soft: #D8581826;
+  --accent-10:   #D8581810;
+  --accent-15:   #D8581815;
+  --accent-20:   #D8581820;
+
+  --or:          #B87C10;
+  --or-soft:     #B87C1020;
+  --or-08:       #B87C1008;
+  --or-10:       #B87C1010;
+  --or-15:       #B87C1015;
+  --or-20:       #B87C1020;
+  --or-30:       #B87C1030;
+
+  --succes:      #2A7A4A;
+  --succes-soft: #2A7A4A20;
+
+  --texte:       #1A0C04;
+  --muted:       #786040;
+  --muted-soft:  #78604040;
+
+  --fond-40:     rgba(255, 251, 240, 0.40);
+  --bordure-20:  rgba(232, 208, 154, 0.20);
+  --bordure-30:  rgba(232, 208, 154, 0.30);
+  --bordure-40:  rgba(232, 208, 154, 0.40);
+  --bordure-50:  rgba(232, 208, 154, 0.50);
+  --bordure-60:  rgba(232, 208, 154, 0.60);
+
+  --body-bg:     #FFFBF0;
+  --body-radial-1: #D8581810;
+  --body-radial-2: #B87C1008;
+
+  --scroll-track: #FFF4D8;
+  --scroll-thumb: #E8D09A;
+  --scroll-hover: #B87C10;
+
+  --selection-bg: #D8581840;
+}
+
+
+/* ─────────────────────────────────────────────
    Scrollbar — utilise les variables de thème
 ───────────────────────────────────────────── */
 * {
