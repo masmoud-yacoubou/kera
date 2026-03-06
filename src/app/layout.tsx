@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Sora, Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
+import { KerToaster } from "@/components/ui/Toast";
 
 // ─────────────────────────────────────────────
 // Fonts Google — chargées via Next.js
@@ -97,6 +98,7 @@ export default function RootLayout({
           storageKey="kera-theme"
         >
           {children}
+          <KerToaster />
         </ThemeProvider>
       </body>
     </html>

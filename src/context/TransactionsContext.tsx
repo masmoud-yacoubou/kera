@@ -3,6 +3,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Transaction, TransactionInsert } from "@/types";
+import { toast } from "@/components/ui/Toast";
+import { formatAmount } from "@/lib/utils";
 
 interface TransactionsContextType {
   transactions: Transaction[];
@@ -39,6 +41,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error("Kera Fetch Error:", err);
       setError("Erreur lors du chargement des activités.");
+      toast.error("Une erreur est survenue", (err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -84,10 +87,12 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       if (insertError) throw insertError;
       
       setTransactions((prev) => [data, ...prev]);
+      toast.success("Transaction ajoutée", `${data.label} — ${formatAmount(data.amount)}`);
       return data;
     } catch (err) {
       console.error("Kera Insert Error:", err);
       setError("Impossible d'enregistrer la transaction.");
+      toast.error("Une erreur est survenue", (err as Error).message);
       return null;
     }
   };
@@ -109,6 +114,7 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error("Kera Update Error:", err);
       setError("Échec de la modification.");
+      toast.error("Une erreur est survenue", (err as Error).message);
       return null;
     }
   };
@@ -124,10 +130,12 @@ export function TransactionsProvider({ children }: { children: ReactNode }) {
       if (deleteError) throw deleteError;
       
       setTransactions((prev) => prev.filter((t) => t.id !== id));
+      toast.success("Transaction supprimée");
       return true;
     } catch (err) {
       console.error("Kera Delete Error:", err);
       setError("Échec de la suppression.");
+      toast.error("Une erreur est survenue", (err as Error).message);
       return false;
     }
   };

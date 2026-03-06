@@ -72,3 +72,11 @@ export function formatDate(dateStr: string): string {
     year: "numeric",
   });
 }
+
+// Formater un montant en FCFA
+export function formatAmount(amount: number): string {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "XOF",
+  }).format(amount);
+}
