@@ -5,40 +5,94 @@ import { usePreferences } from "@/hooks/usePreferences";
 import { useTransactions } from "@/context/TransactionsContext";
 import { useAuth } from "@/hooks/useAuth";
 import { Currency, CURRENCIES } from "@/types";
-import { Check, Download, User, Settings2, Database, Info } from "lucide-react";
+import { Check, Download, User, Settings2, Database, Info, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
 
 // ─────────────────────────────────────────────
 // Style de carte réutilisable
 // ─────────────────────────────────────────────
 const cardStyle = {
-  background: "linear-gradient(145deg, #1C1610, #1A1410)",
-  border: "1px solid #3A281830",
-  boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+  background: "linear-gradient(145deg, var(--carte), var(--surface))",
+  border: "1px solid var(--bordure-30)",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
 };
 
 // ─────────────────────────────────────────────
 // Sous-composant : en-tête de section
-// Factorisation des headers de carte
 // ─────────────────────────────────────────────
-function SectionHeader({
-  icon,
-  title,
-}: {
-  icon: React.ReactNode;
-  title: string;
-}) {
+function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
     <div className="flex items-center gap-2.5 sm:gap-3 mb-5 sm:mb-6">
-      <span className="text-[#C8A050] shrink-0" aria-hidden="true">
+      <span style={{ color: "var(--or)" }} className="shrink-0" aria-hidden="true">
         {icon}
       </span>
       <h2
-        className="text-sm sm:text-base font-semibold text-[#F2E8D8]"
-        style={{ fontFamily: "var(--font-sora)" }}
+        className="text-sm sm:text-base font-semibold"
+        style={{ color: "var(--texte)", fontFamily: "var(--font-sora)" }}
       >
         {title}
       </h2>
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Sous-composant : toggle thème light / dark
+// Intégré dans la section Préférences
+// ─────────────────────────────────────────────
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
+
+  return (
+    <button
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label={isDark ? "Passer en mode clair" : "Passer en mode sombre"}
+      className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl transition-all min-h-[44px]"
+      style={{
+        background: "var(--fond-40)",
+        border: "1px solid var(--bordure-30)",
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--or-30)"}
+      onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--bordure-30)"}
+    >
+      {/* Icône */}
+      <div
+        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+        style={{
+          background: "var(--or-10)",
+          border: "1px solid var(--or-20)",
+        }}
+        aria-hidden="true"
+      >
+        {isDark
+          ? <Sun  size={16} style={{ color: "var(--or)" }} />
+          : <Moon size={16} style={{ color: "var(--or)" }} />
+        }
+      </div>
+
+      {/* Labels */}
+      <div className="flex-1 text-left">
+        <p className="text-xs font-bold" style={{ color: "var(--texte)" }}>
+          {isDark ? "Mode clair" : "Mode sombre"}
+        </p>
+        <p className="text-[10px]" style={{ color: "var(--muted)" }}>
+          Thème Sahara {isDark ? "Light" : "Dark"}
+        </p>
+      </div>
+
+      {/* Switch visuel */}
+      <div
+        className="w-10 h-6 rounded-full relative transition-colors duration-300 shrink-0"
+        style={{ background: isDark ? "var(--bordure)" : "var(--accent)" }}
+        aria-hidden="true"
+      >
+        <div
+          className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 shadow-sm"
+          style={{ left: isDark ? "4px" : "20px" }}
+        />
+      </div>
+    </button>
   );
 }
 
@@ -49,11 +103,9 @@ export default function ParametresPage() {
   const { preferences, updatePreferences } = usePreferences();
   const { transactions } = useTransactions();
   const { user } = useAuth();
-
-  // ── Feedback de sauvegarde ───────────────────
-  // Affiché 2 secondes après chaque mise à jour
   const [saved, setSaved] = useState(false);
 
+  // ── Mise à jour des préférences ──────────────
   const handleUpdate = async (
     updates: Partial<{ currency: Currency; month_start_day: number }>
   ) => {
@@ -62,17 +114,14 @@ export default function ParametresPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  // ── Export CSV ───────────────────────────────
-  // Génère un fichier CSV avec toutes les transactions
-  // et le télécharge côté client sans appel serveur
+  // ── Export CSV côté client ───────────────────
   const exportCSV = () => {
     const header = "Date,Libellé,Catégorie,Type,Montant\n";
     const rows = transactions
-      .map(
-        (t) =>
-          `${t.date},"${t.label}",${t.category},${
-            t.type === "income" ? "Entrée" : "Sortie"
-          },${t.amount}`
+      .map((t) =>
+        `${t.date},"${t.label}",${t.category},${
+          t.type === "income" ? "Entrée" : "Sortie"
+        },${t.amount}`
       )
       .join("\n");
 
@@ -91,31 +140,37 @@ export default function ParametresPage() {
       {/* ── Header ──────────────────────────────── */}
       <div className="pt-2 md:pt-0">
         <h1
-          className="text-xl sm:text-2xl font-bold text-[#F2E8D8] tracking-tight"
-          style={{ fontFamily: "var(--font-sora)" }}
+          className="text-xl sm:text-2xl font-bold tracking-tight"
+          style={{ color: "var(--texte)", fontFamily: "var(--font-sora)" }}
         >
           Paramètres
         </h1>
-        <p className="text-[9px] sm:text-xs text-[#9A8060] font-medium uppercase tracking-widest mt-1 opacity-60">
+        <p
+          className="text-[9px] sm:text-xs font-medium uppercase tracking-widest mt-1 opacity-60"
+          style={{ color: "var(--muted)" }}
+        >
           Configuration de votre espace
         </p>
       </div>
 
       {/* ── Section Profil ───────────────────────── */}
-      <div
-        className="rounded-[1.75rem] sm:rounded-[2rem] p-4 sm:p-5 md:p-6"
-        style={cardStyle}
-      >
+      <div className="rounded-[1.75rem] sm:rounded-[2rem] p-4 sm:p-5 md:p-6" style={cardStyle}>
         <SectionHeader icon={<User size={17} />} title="Profil" />
 
-        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 p-4 rounded-2xl bg-[#0E0B08]/40 border border-[#3A281830]">
+        <div
+          className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 p-4 rounded-2xl"
+          style={{
+            background: "var(--fond-40)",
+            border: "1px solid var(--bordure-30)",
+          }}
+        >
           {/* Avatar */}
           <div
             className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0"
-            style={{ background: "#C8A05010", border: "1px solid #C8A05020" }}
+            style={{ background: "var(--or-10)", border: "1px solid var(--or-20)" }}
             aria-hidden="true"
           >
-            <span className="text-lg sm:text-xl font-bold text-[#C8A050]">
+            <span className="text-lg sm:text-xl font-bold" style={{ color: "var(--or)" }}>
               {user?.email?.substring(0, 2).toUpperCase() ?? "?"}
             </span>
           </div>
@@ -123,12 +178,16 @@ export default function ParametresPage() {
           {/* Infos */}
           <div className="text-center sm:text-left min-w-0 w-full">
             <p
-              className="text-xs sm:text-sm font-medium text-[#F2E8D8] truncate"
+              className="text-xs sm:text-sm font-medium truncate"
+              style={{ color: "var(--texte)" }}
               aria-label={`Email : ${user?.email}`}
             >
               {user?.email}
             </p>
-            <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#9A8060] font-bold mt-0.5">
+            <p
+              className="text-[9px] sm:text-[10px] uppercase tracking-wider font-bold mt-0.5"
+              style={{ color: "var(--muted)" }}
+            >
               Utilisateur Kera
             </p>
           </div>
@@ -142,18 +201,27 @@ export default function ParametresPage() {
       >
         <SectionHeader icon={<Settings2 size={17} />} title="Préférences d'affichage" />
 
+        {/* ── Toggle thème ──────────────────────── */}
+        <div className="space-y-2">
+          <p
+            className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em]"
+            style={{ color: "var(--muted)" }}
+          >
+            Apparence
+          </p>
+          <ThemeToggle />
+        </div>
+
         {/* ── Devise ────────────────────────────── */}
         <div className="space-y-3 sm:space-y-4">
           <label
             id="currency-label"
-            className="block text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-[#9A8060]"
+            className="block text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em]"
+            style={{ color: "var(--muted)" }}
           >
             Devise de référence
           </label>
 
-          {/* Grille de devises
-              3 devises : grid-cols-3 suffit à toutes les tailles
-          */}
           <div
             role="radiogroup"
             aria-labelledby="currency-label"
@@ -169,58 +237,66 @@ export default function ParametresPage() {
                   onClick={() => handleUpdate({ currency: c.code })}
                   className="py-3 sm:py-4 px-2 rounded-2xl transition-all border min-h-[64px] sm:min-h-[72px]"
                   style={isActive ? {
-                    background: "#D4522A10",
-                    border: "1px solid #D4522A50",
-                    color: "#D4522A",
-                    boxShadow: "0 0 20px #D4522A08",
+                    background: "var(--accent-10)",
+                    border: "1px solid var(--accent-20)",
+                    color: "var(--accent)",
+                    boxShadow: "0 0 20px var(--accent-10)",
                   } : {
-                    background: "#0E0B0840",
-                    border: "1px solid #3A281830",
-                    color: "#9A8060",
+                    background: "var(--fond-40)",
+                    border: "1px solid var(--bordure-30)",
+                    color: "var(--muted)",
                   }}
                 >
-                  {/* Symbole */}
                   <span
-                    className="block text-lg sm:text-xl mb-0.5 font-bold transition-colors"
-                    style={{ color: isActive ? "#D4522A" : "#F2E8D8" }}
+                    className="block text-lg sm:text-xl mb-0.5 font-bold"
+                    style={{ color: isActive ? "var(--accent)" : "var(--texte)" }}
                     aria-hidden="true"
                   >
                     {c.symbol}
                   </span>
-                  {/* Code */}
-                  <span className="block text-[9px] sm:text-[10px] font-black uppercase tracking-tighter opacity-70">
+                  <span
+                    className="block text-[9px] sm:text-[10px] font-black uppercase tracking-tighter opacity-70"
+                  >
                     {c.code}
                   </span>
-                  {/* Label accessible uniquement pour les lecteurs d'écran */}
                   <span className="sr-only">{c.label}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Note d'information */}
+          {/* Note */}
           <div
             className="flex items-start gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-2xl"
-            style={{ background: "#C8A05008", border: "1px solid #C8A05015" }}
+            style={{
+              background: "var(--or-08)",
+              border: "1px solid var(--or-15)",
+            }}
             role="note"
           >
-            <Info size={14} className="text-[#C8A050] shrink-0 mt-0.5" aria-hidden="true" />
-            <p className="text-[10px] sm:text-[11px] text-[#9A8060] leading-relaxed">
+            <Info size={14} className="shrink-0 mt-0.5" style={{ color: "var(--or)" }} aria-hidden="true" />
+            <p
+              className="text-[10px] sm:text-[11px] leading-relaxed"
+              style={{ color: "var(--muted)" }}
+            >
               Le changement de devise modifie uniquement le{" "}
-              <span className="text-[#C8A050] font-bold">symbole visuel</span>.
+              <span className="font-bold" style={{ color: "var(--or)" }}>
+                symbole visuel
+              </span>.
               Aucune conversion automatique n&apos;est effectuée sur vos montants.
             </p>
           </div>
         </div>
 
-        {/* ── Jour de début de cycle ────────────── */}
+        {/* ── Jour de cycle ─────────────────────── */}
         <div
           className="space-y-3 sm:space-y-4 pt-5 sm:pt-6"
-          style={{ borderTop: "1px solid #3A281820" }}
+          style={{ borderTop: "1px solid var(--bordure-20)" }}
         >
           <label
             id="cycle-label"
-            className="block text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-[#9A8060]"
+            className="block text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em]"
+            style={{ color: "var(--muted)" }}
           >
             Jour de réinitialisation mensuelle
           </label>
@@ -241,14 +317,14 @@ export default function ParametresPage() {
                   onClick={() => handleUpdate({ month_start_day: day })}
                   className="w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl text-xs sm:text-sm font-black transition-all min-h-[44px]"
                   style={isActive ? {
-                    background: "#D4522A",
+                    background: "var(--accent)",
                     border: "1px solid transparent",
                     color: "#fff",
-                    boxShadow: "0 8px 16px #D4522A30",
+                    boxShadow: "0 8px 16px var(--accent-20)",
                   } : {
-                    background: "#0E0B0840",
-                    border: "1px solid #3A281830",
-                    color: "#9A8060",
+                    background: "var(--fond-40)",
+                    border: "1px solid var(--bordure-30)",
+                    color: "var(--muted)",
                   }}
                 >
                   {day}
@@ -261,7 +337,8 @@ export default function ParametresPage() {
         {/* ── Feedback sauvegarde ───────────────── */}
         {saved && (
           <div
-            className="flex items-center gap-2 text-[#4A8A6A] text-[10px] sm:text-xs font-bold uppercase tracking-wider animate-in fade-in slide-in-from-bottom-1"
+            className="flex items-center gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider animate-in fade-in slide-in-from-bottom-1"
+            style={{ color: "var(--succes)" }}
             role="status"
             aria-live="polite"
           >
@@ -272,17 +349,20 @@ export default function ParametresPage() {
       </div>
 
       {/* ── Section Export ───────────────────────── */}
-      <div
-        className="rounded-[1.75rem] sm:rounded-[2rem] p-4 sm:p-5 md:p-6"
-        style={cardStyle}
-      >
+      <div className="rounded-[1.75rem] sm:rounded-[2rem] p-4 sm:p-5 md:p-6" style={cardStyle}>
         <SectionHeader icon={<Database size={17} />} title="Données & Export" />
 
         <div
           className="p-4 sm:p-5 rounded-2xl"
-          style={{ background: "#0E0B0840", border: "1px solid #3A281830" }}
+          style={{
+            background: "var(--fond-40)",
+            border: "1px solid var(--bordure-30)",
+          }}
         >
-          <p className="text-[11px] sm:text-xs md:text-sm text-[#9A8060] mb-4 sm:mb-5 leading-relaxed">
+          <p
+            className="text-[11px] sm:text-xs md:text-sm mb-4 sm:mb-5 leading-relaxed"
+            style={{ color: "var(--muted)" }}
+          >
             Téléchargez l&apos;intégralité de votre historique au format CSV
             pour l&apos;importer dans Excel ou Google Sheets.
           </p>
@@ -293,9 +373,9 @@ export default function ParametresPage() {
             aria-label={`Exporter ${transactions.length} transactions au format CSV`}
             className="w-full flex items-center justify-center gap-2.5 sm:gap-3 px-4 sm:px-6 py-3.5 sm:py-4 rounded-2xl text-white text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed min-h-[48px]"
             style={{
-              background: "linear-gradient(135deg, #D4522A, #C04020)",
+              background: "linear-gradient(135deg, var(--accent), #C04020)",
               boxShadow: transactions.length > 0
-                ? "0 8px 24px rgba(212,82,42,0.3)"
+                ? "0 8px 24px var(--accent-20)"
                 : "none",
             }}
           >

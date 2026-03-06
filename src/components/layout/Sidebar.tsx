@@ -36,13 +36,10 @@ const NAV_ITEMS = [
 // Helpers pour useSyncExternalStore
 // Évite les erreurs d'hydratation SSR/client
 // ─────────────────────────────────────────────
-const subscribe        = () => () => {};
-const getSnapshot      = () => true;
+const subscribe         = () => () => {};
+const getSnapshot       = () => true;
 const getServerSnapshot = () => false;
 
-// ─────────────────────────────────────────────
-// Props
-// ─────────────────────────────────────────────
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
@@ -50,7 +47,6 @@ interface SidebarProps {
 
 // ─────────────────────────────────────────────
 // Composant : item de navigation
-// Extrait pour la lisibilité et la réutilisabilité
 // ─────────────────────────────────────────────
 function NavItem({
   href,
@@ -73,22 +69,23 @@ function NavItem({
       onClick={onClick}
       aria-current={active ? "page" : undefined}
       className={cn(
-        // Base — touch target minimum 44px (accessibilité)
         "relative flex items-center gap-3 px-4 py-3.5 rounded-2xl",
         "transition-all duration-200 group min-h-[44px]",
-        active ? "text-[#F2E8D8]" : "text-[#9A8060] hover:text-[#F2E8D8]"
       )}
-      style={active ? {
-        background: "linear-gradient(135deg, #D4522A15 0%, #C8A05008 100%)",
-        border: "1px solid #D4522A25",
-      } : {}}
+      style={{
+        color: active ? "var(--texte)" : "var(--muted)",
+        ...(active ? {
+          background: "linear-gradient(135deg, var(--accent-15) 0%, var(--or-08) 100%)",
+          border: "1px solid var(--accent-20)",
+        } : {}),
+      }}
     >
       {/* Barre active gauche */}
       {active && (
         <div
           aria-hidden="true"
           className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full"
-          style={{ background: "linear-gradient(180deg, #D4522A, #C8A050)" }}
+          style={{ background: "linear-gradient(180deg, var(--accent), var(--or))" }}
         />
       )}
 
@@ -98,31 +95,28 @@ function NavItem({
         aria-hidden="true"
         className={cn(
           "shrink-0 transition-transform duration-200",
-          active ? "text-[#D4522A] scale-110" : "group-hover:scale-110"
+          active ? "scale-110" : "group-hover:scale-110"
         )}
+        style={{ color: active ? "var(--accent)" : undefined }}
       />
 
-      {/* Label — visible si sidebar ouverte */}
+      {/* Label */}
       {isOpen && (
         <span className="text-sm font-semibold tracking-wide truncate">
           {label}
         </span>
       )}
 
-      {/* Tooltip — visible si sidebar fermée (desktop) */}
+      {/* Tooltip sidebar fermée */}
       {!isOpen && (
         <div
           role="tooltip"
-          className={cn(
-            "absolute left-14 z-50 px-3 py-1.5 rounded-xl",
-            "text-xs font-semibold text-[#F2E8D8] whitespace-nowrap",
-            "pointer-events-none opacity-0 group-hover:opacity-100",
-            "transition-opacity duration-150"
-          )}
+          className="absolute left-14 z-50 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150"
           style={{
-            background: "#251C14",
-            border: "1px solid #3A2818",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            background: "var(--carte)",
+            border: "1px solid var(--bordure)",
+            color: "var(--texte)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
           }}
         >
           {label}
@@ -140,26 +134,20 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const { signOut, getInitials } = useAuth();
   const { isInstallable, installApp } = usePWA();
 
-  // Détection côté client (SSR-safe)
   const isClient = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  // Détection iOS mémorisée — ne change jamais après montage
   const isIOS = useMemo(() => {
     if (typeof window === "undefined") return false;
     return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
   }, []);
 
-  // ── Fermeture automatique sur mobile au changement de route ──
-  // Évite que la sidebar reste ouverte après navigation
+  // Fermeture auto sur mobile au changement de route
   useEffect(() => {
-    if (window.innerWidth < 1024 && isOpen) {
-      onToggle();
-    }
-    // On veut seulement réagir au changement de pathname
+    if (window.innerWidth < 1024 && isOpen) onToggle();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  // ── Blocage du scroll body quand sidebar ouverte sur mobile ──
+  // Blocage du scroll body sur mobile
   useEffect(() => {
     if (window.innerWidth < 1024) {
       document.body.style.overflow = isOpen ? "hidden" : "";
@@ -169,10 +157,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
   return (
     <>
-      {/* ── Overlay mobile ──────────────────────
-          Fond semi-transparent cliquable pour fermer
-          Visible uniquement sur mobile (lg:hidden)
-      ─────────────────────────────────────────── */}
+      {/* Overlay mobile */}
       {isOpen && (
         <div
           aria-hidden="true"
@@ -181,22 +166,18 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         />
       )}
 
-      {/* ── Sidebar ─────────────────────────────
-          Mobile  : position fixe, glisse depuis la gauche
-          Desktop : position sticky, largeur animée
-      ─────────────────────────────────────────── */}
+      {/* Sidebar desktop — sticky, largeur animée */}
       <aside
         aria-label="Navigation principale"
         className={cn(
-          // Desktop : sticky, largeur animée
           "hidden lg:flex lg:flex-col lg:h-screen lg:sticky lg:top-0 lg:shrink-0",
           "transition-[width] duration-200 ease-out",
           isOpen ? "lg:w-56" : "lg:w-16",
         )}
         style={{
-          background: "linear-gradient(180deg, #1C1610 0%, #161008 100%)",
-          borderRight: "1px solid #3A281820",
-          boxShadow: "4px 0 24px rgba(0,0,0,0.3)",
+          background: "linear-gradient(180deg, var(--carte) 0%, var(--carte-2) 100%)",
+          borderRight: "1px solid var(--bordure-20)",
+          boxShadow: "4px 0 24px rgba(0,0,0,0.15)",
           willChange: "width",
         }}
       >
@@ -213,10 +194,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         />
       </aside>
 
-      {/* ── Drawer mobile ───────────────────────
-          Séparé du sidebar desktop pour éviter
-          les conflits de classes responsive
-      ─────────────────────────────────────────── */}
+      {/* Drawer mobile */}
       <div
         aria-label="Menu mobile"
         className={cn(
@@ -225,8 +203,8 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
         style={{
-          background: "linear-gradient(180deg, #1C1610 0%, #161008 100%)",
-          boxShadow: "8px 0 32px rgba(0,0,0,0.5)",
+          background: "linear-gradient(180deg, var(--carte) 0%, var(--carte-2) 100%)",
+          boxShadow: "8px 0 32px rgba(0,0,0,0.3)",
         }}
       >
         <SidebarContent
@@ -248,7 +226,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
 // ─────────────────────────────────────────────
 // Composant interne : contenu partagé
-// Utilisé par le sidebar desktop ET le drawer mobile
+// Utilisé par sidebar desktop ET drawer mobile
 // ─────────────────────────────────────────────
 function SidebarContent({
   isOpen,
@@ -278,14 +256,14 @@ function SidebarContent({
       {/* ── Header logo ───────────────────────── */}
       <div
         className="flex items-center gap-3 px-5 py-6 shrink-0"
-        style={{ borderBottom: "1px solid #3A281820" }}
+        style={{ borderBottom: "1px solid var(--bordure-20)" }}
       >
-        {/* Logo */}
+        {/* Logo — gradient accent toujours fixe */}
         <div
           className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
           style={{
-            background: "linear-gradient(135deg, #D4522A 0%, #C04020 100%)",
-            boxShadow: "0 4px 20px rgba(212,82,42,0.3)",
+            background: "linear-gradient(135deg, var(--accent) 0%, #C04020 100%)",
+            boxShadow: "0 4px 20px var(--accent-20)",
             transition: "transform 0.3s ease",
             transform: !isOpen && !isMobileDrawer ? "scale(0.9)" : "scale(1)",
           }}
@@ -293,28 +271,34 @@ function SidebarContent({
           <TrendingUp size={20} className="text-white" aria-hidden="true" />
         </div>
 
-        {/* Nom de l'app */}
+        {/* Nom */}
         {(isOpen || isMobileDrawer) && (
           <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-left-2 duration-200">
             <span
-              className="text-xl font-bold text-[#F2E8D8] tracking-tight block"
-              style={{ fontFamily: "var(--font-sora)" }}
+              className="text-xl font-bold tracking-tight block"
+              style={{ color: "var(--texte)", fontFamily: "var(--font-sora)" }}
             >
               Kera
             </span>
-            <p className="text-[10px] text-[#9A8060] tracking-[0.2em] uppercase font-bold opacity-70">
+            <p
+              className="text-[10px] tracking-[0.2em] uppercase font-bold opacity-70"
+              style={{ color: "var(--muted)" }}
+            >
               Finance
             </p>
           </div>
         )}
 
-        {/* Bouton fermer — drawer mobile uniquement */}
+        {/* Bouton fermer — mobile uniquement */}
         {isMobileDrawer && (
           <button
             onClick={onToggle}
             aria-label="Fermer le menu"
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-[#9A8060] hover:text-[#F2E8D8] transition-colors ml-auto"
-            style={{ background: "#3A281840" }}
+            className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors ml-auto"
+            style={{
+              background: "var(--bordure-40)",
+              color: "var(--muted)",
+            }}
           >
             <X size={16} />
           </button>
@@ -346,22 +330,36 @@ function SidebarContent({
             <div
               className="p-4 rounded-2xl animate-in zoom-in-95 duration-500"
               style={{
-                background: "linear-gradient(135deg, #D4522A12, transparent)",
-                border: "1px solid #D4522A20",
+                background: "linear-gradient(135deg, var(--accent-10), transparent)",
+                border: "1px solid var(--accent-20)",
               }}
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-[#D4522A] flex items-center justify-center">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ background: "var(--accent)" }}
+                >
                   <Smartphone size={16} className="text-white" aria-hidden="true" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-bold text-[#F2E8D8] leading-tight">Kera Mobile</p>
-                  <p className="text-[9px] text-[#9A8060] uppercase tracking-tighter">Accès direct</p>
+                  <p
+                    className="text-[11px] font-bold leading-tight"
+                    style={{ color: "var(--texte)" }}
+                  >
+                    Kera Mobile
+                  </p>
+                  <p
+                    className="text-[9px] uppercase tracking-tighter"
+                    style={{ color: "var(--muted)" }}
+                  >
+                    Accès direct
+                  </p>
                 </div>
               </div>
               <button
                 onClick={installApp}
-                className="w-full py-2.5 rounded-xl bg-[#D4522A] text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#C04020] transition-all active:scale-95 min-h-[44px]"
+                className="w-full py-2.5 rounded-xl text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 min-h-[44px]"
+                style={{ background: "var(--accent)" }}
               >
                 <Download size={12} aria-hidden="true" />
                 Installer l&apos;app
@@ -370,10 +368,16 @@ function SidebarContent({
           ) : isIOS ? (
             <div
               className="p-3 rounded-xl"
-              style={{ background: "#3A281820", border: "1px solid #3A281830" }}
+              style={{
+                background: "var(--bordure-20)",
+                border: "1px solid var(--bordure-30)",
+              }}
             >
-              <p className="text-[9px] text-[#9A8060] text-center leading-relaxed italic">
-                Sur iPhone : <span className="text-[#F2E8D8]">Partager</span> →{" "}
+              <p
+                className="text-[9px] text-center leading-relaxed italic"
+                style={{ color: "var(--muted)" }}
+              >
+                Sur iPhone : <span style={{ color: "var(--texte)" }}>Partager</span> →{" "}
                 &ldquo;Sur l&apos;écran d&apos;accueil&rdquo;
               </p>
             </div>
@@ -384,32 +388,51 @@ function SidebarContent({
       {/* ── Footer compte + déconnexion ───────── */}
       <div
         className="p-4 space-y-2 shrink-0"
-        style={{ borderTop: "1px solid #3A281820" }}
+        style={{ borderTop: "1px solid var(--bordure-20)" }}
       >
         {/* Carte compte */}
         {(isOpen || isMobileDrawer) ? (
           <div
             className="flex items-center gap-3 px-3 py-3 rounded-2xl"
-            style={{ background: "#0E0B0840", border: "1px solid #3A281820" }}
+            style={{
+              background: "var(--fond-40)",
+              border: "1px solid var(--bordure-20)",
+            }}
           >
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: "#C8A05015", border: "1px solid #C8A05030" }}
+              style={{
+                background: "var(--or-15)",
+                border: "1px solid var(--or-30)",
+              }}
             >
-              <span className="text-xs font-bold text-[#C8A050]" aria-hidden="true">
+              <span
+                className="text-xs font-bold"
+                style={{ color: "var(--or)" }}
+                aria-hidden="true"
+              >
                 {getInitials()}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold text-[#F2E8D8] truncate uppercase tracking-tighter">
+              <p
+                className="text-[11px] font-bold truncate uppercase tracking-tighter"
+                style={{ color: "var(--texte)" }}
+              >
                 Espace Personnel
               </p>
               <div className="flex items-center gap-1.5">
                 <div
-                  className="w-1.5 h-1.5 rounded-full bg-[#4A8A6A]"
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: "var(--succes)" }}
                   aria-hidden="true"
                 />
-                <span className="text-[10px] text-[#9A8060]">Session active</span>
+                <span
+                  className="text-[10px]"
+                  style={{ color: "var(--muted)" }}
+                >
+                  Session active
+                </span>
               </div>
             </div>
           </div>
@@ -417,20 +440,36 @@ function SidebarContent({
           <div className="flex justify-center py-1">
             <div
               className="w-10 h-10 rounded-2xl flex items-center justify-center"
-              style={{ background: "#C8A05010", border: "1px solid #C8A05020" }}
+              style={{
+                background: "var(--or-10)",
+                border: "1px solid var(--or-20)",
+              }}
             >
-              <span className="text-xs font-bold text-[#C8A050]" aria-hidden="true">
+              <span
+                className="text-xs font-bold"
+                style={{ color: "var(--or)" }}
+                aria-hidden="true"
+              >
                 {getInitials()}
               </span>
             </div>
           </div>
         )}
 
-        {/* Bouton déconnexion */}
+        {/* Déconnexion */}
         <button
           onClick={signOut}
           aria-label="Se déconnecter de Kera"
-          className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-[#9A8060] hover:text-[#D4522A] hover:bg-[#D4522A08] transition-all group min-h-[44px]"
+          className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all group min-h-[44px]"
+          style={{ color: "var(--muted)" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "var(--accent)";
+            e.currentTarget.style.background = "var(--accent-10)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "var(--muted)";
+            e.currentTarget.style.background = "transparent";
+          }}
         >
           <LogOut
             size={20}
@@ -443,17 +482,19 @@ function SidebarContent({
         </button>
       </div>
 
-      {/* ── Bouton toggle desktop ─────────────────
-          Flottant sur le bord droit — desktop seulement
-      ─────────────────────────────────────────── */}
+      {/* ── Bouton toggle desktop ─────────────── */}
       {!isMobileDrawer && (
         <button
           onClick={onToggle}
           aria-label={isOpen ? "Réduire le menu" : "Agrandir le menu"}
-          className="absolute -right-3 top-24 w-6 h-6 rounded-full flex items-center justify-center bg-[#D4522A] text-white border-2 border-[#161008] hover:scale-110 transition-transform shadow-lg z-50"
+          className="absolute -right-3 top-24 w-6 h-6 rounded-full flex items-center justify-center text-white border-2 hover:scale-110 transition-transform shadow-lg z-50"
+          style={{
+            background: "var(--accent)",
+            borderColor: "var(--carte-2)",
+          }}
         >
           {isOpen
-            ? <ChevronLeft size={12} strokeWidth={3} aria-hidden="true" />
+            ? <ChevronLeft  size={12} strokeWidth={3} aria-hidden="true" />
             : <ChevronRight size={12} strokeWidth={3} aria-hidden="true" />
           }
         </button>
@@ -478,11 +519,15 @@ export function MobileMenuButton({
       onClick={onClick}
       aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
       aria-expanded={isOpen}
-      className="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center text-[#9A8060] hover:text-[#F2E8D8] transition-colors min-h-[44px]"
-      style={{ background: "#251C14", border: "1px solid #3A2818" }}
+      className="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center transition-colors min-h-[44px]"
+      style={{
+        background: "var(--carte)",
+        border: "1px solid var(--bordure)",
+        color: "var(--muted)",
+      }}
     >
       {isOpen
-        ? <X size={18} aria-hidden="true" />
+        ? <X    size={18} aria-hidden="true" />
         : <Menu size={18} aria-hidden="true" />
       }
     </button>

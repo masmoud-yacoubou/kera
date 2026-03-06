@@ -6,39 +6,27 @@ import { usePreferences } from "@/hooks/usePreferences";
 import { CATEGORY_COLORS, CATEGORIES } from "@/types";
 import { groupByCategory, groupByMonth } from "@/lib/utils";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-  CartesianGrid,
+  BarChart, Bar, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid,
 } from "recharts";
 import {
-  TrendingUp,
-  TrendingDown,
-  Wallet,
-  Target,
-  PieChart as PieIcon,
-  BarChart3,
+  TrendingUp, TrendingDown, Wallet, Target,
+  PieChart as PieIcon, BarChart3,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────
-// Style de carte réutilisable
+// Styles partagés — définis en dehors du composant
+// pour éviter les recréations à chaque render
 // ─────────────────────────────────────────────
 const cardStyle = {
-  background: "linear-gradient(145deg, #1C1610, #1A1410)",
-  border: "1px solid #3A281830",
-  boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+  background: "linear-gradient(145deg, var(--carte), var(--surface))",
+  border: "1px solid var(--bordure-30)",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
 };
 
-// ─────────────────────────────────────────────
-// Style tooltip recharts — partagé entre les 2 charts
-// ─────────────────────────────────────────────
+// Note : tooltipStyle utilise des valeurs statiques car recharts
+// n'injecte pas les styles dans un contexte React — les CSS
+// variables ne sont pas résolues dans cet objet de style
 const tooltipStyle = {
   backgroundColor: "#1A1410",
   border: "1px solid #3A2818",
@@ -48,17 +36,14 @@ const tooltipStyle = {
 const tooltipItemStyle = {
   color: "#F2E8D8",
   fontSize: "11px",
-  fontWeight: "900",
+  fontWeight: "900" as const,
 };
 
 // ─────────────────────────────────────────────
 // Sous-composant : KPI card
 // ─────────────────────────────────────────────
 function KpiCard({
-  label,
-  value,
-  color,
-  icon,
+  label, value, color, icon,
 }: {
   label: string;
   value: string;
@@ -67,11 +52,16 @@ function KpiCard({
 }) {
   return (
     <div
-      className="rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 transition-all border border-transparent hover:border-[#C8A05020]"
-      style={cardStyle}
+      className="rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 transition-all border"
+      style={{
+        ...cardStyle,
+        borderColor: "var(--bordure-30)",
+      }}
       aria-label={`${label} : ${value}`}
+      onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--or-20)"}
+      onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--bordure-30)"}
     >
-      {/* Label + icône */}
+      {/* Icône + label */}
       <div className="flex items-center gap-2 mb-2 sm:mb-3">
         <div
           className="p-1.5 rounded-lg shrink-0"
@@ -80,15 +70,18 @@ function KpiCard({
         >
           {icon}
         </div>
-        <p className="text-[9px] sm:text-[10px] uppercase tracking-widest text-[#9A8060] font-black truncate">
+        <p
+          className="text-[9px] sm:text-[10px] uppercase tracking-widest font-black truncate"
+          style={{ color: "var(--muted)" }}
+        >
           {label}
         </p>
       </div>
 
       {/* Valeur */}
       <p
-        className="text-lg sm:text-xl md:text-2xl font-black text-[#F2E8D8] tracking-tighter tabular-nums truncate"
-        style={{ fontFamily: "var(--font-sora)" }}
+        className="text-lg sm:text-xl md:text-2xl font-black tracking-tighter tabular-nums truncate"
+        style={{ color: "var(--texte)", fontFamily: "var(--font-sora)" }}
       >
         {value}
       </p>
@@ -97,12 +90,15 @@ function KpiCard({
 }
 
 // ─────────────────────────────────────────────
-// Sous-composant : état vide d'un graphique
+// Sous-composant : état vide graphique
 // ─────────────────────────────────────────────
 function ChartEmpty() {
   return (
     <div className="h-full flex items-center justify-center">
-      <p className="text-[10px] font-black text-[#9A8060] uppercase tracking-widest opacity-30">
+      <p
+        className="text-[10px] font-black uppercase tracking-widest opacity-30"
+        style={{ color: "var(--muted)" }}
+      >
         Aucune donnée
       </p>
     </div>
@@ -113,11 +109,7 @@ function ChartEmpty() {
 // Sous-composant : barre de progression catégorie
 // ─────────────────────────────────────────────
 function CategoryBar({
-  category,
-  total,
-  pct,
-  color,
-  formatAmount,
+  category, total, pct, color, formatAmount,
 }: {
   category: string;
   total: number;
@@ -132,14 +124,25 @@ function CategoryBar({
       {/* Label + montant + pourcentage */}
       <div className="flex justify-between items-end mb-2 sm:mb-3 px-1">
         <div className="space-y-0.5 min-w-0 mr-4">
-          <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] text-[#9A8060] group-hover:text-[#F2E8D8] transition-colors truncate">
+          <p
+            className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.15em] transition-colors truncate"
+            style={{ color: "var(--muted)" }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "var(--texte)"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}
+          >
             {category}
           </p>
-          <p className="text-xs sm:text-sm font-bold text-[#F2E8D8] tabular-nums">
+          <p
+            className="text-xs sm:text-sm font-bold tabular-nums"
+            style={{ color: "var(--texte)" }}
+          >
             {formatAmount(total)}
           </p>
         </div>
-        <p className="text-[9px] sm:text-[10px] font-black text-[#C8A050] opacity-80 tabular-nums shrink-0">
+        <p
+          className="text-[9px] sm:text-[10px] font-black opacity-80 tabular-nums shrink-0"
+          style={{ color: "var(--or)" }}
+        >
           {pct.toFixed(0)}%
         </p>
       </div>
@@ -152,7 +155,10 @@ function CategoryBar({
         aria-valuemax={100}
         aria-label={`${category} : ${pct.toFixed(0)}% des dépenses`}
         className="h-1 w-full rounded-full overflow-hidden"
-        style={{ background: "#0E0B08", border: "1px solid #3A281820" }}
+        style={{
+          background: "var(--fond)",
+          border: "1px solid var(--bordure-20)",
+        }}
       >
         <div
           className="h-full rounded-full transition-all duration-1000 ease-out"
@@ -177,12 +183,11 @@ export default function StatsPage() {
   const pieData = groupByCategory(transactions);
   const barData = groupByMonth(transactions);
 
-  // ── Taux d'épargne ───────────────────────────
   const savingsRate = totalIncome > 0
     ? Math.max(0, ((totalIncome - totalExpenses) / totalIncome) * 100).toFixed(1)
     : "0";
 
-  // ── KPIs ────────────────────────────────────
+  // KPIs — couleurs hardcodées car passées dans des dégradés inline
   const kpis = [
     { label: "Revenus",  value: formatAmount(totalIncome),   color: "#4A8A6A", icon: <TrendingUp  size={14} aria-hidden="true" /> },
     { label: "Dépenses", value: formatAmount(totalExpenses), color: "#D4522A", icon: <TrendingDown size={14} aria-hidden="true" /> },
@@ -196,64 +201,57 @@ export default function StatsPage() {
       {/* ── Header ──────────────────────────────── */}
       <div className="flex flex-col gap-1 pt-2 md:pt-0">
         <h1
-          className="text-xl sm:text-2xl md:text-3xl font-black text-[#F2E8D8] tracking-tight"
-          style={{ fontFamily: "var(--font-sora)" }}
+          className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight"
+          style={{ color: "var(--texte)", fontFamily: "var(--font-sora)" }}
         >
           Statistiques
         </h1>
-        <p className="text-[9px] sm:text-[10px] text-[#9A8060] font-bold uppercase tracking-[0.2em] opacity-80">
+        <p
+          className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] opacity-80"
+          style={{ color: "var(--muted)" }}
+        >
           Analyse de santé financière
         </p>
       </div>
 
-      {/* ── KPIs ────────────────────────────────────
-          1 colonne mobile, 2 tablette, 4 desktop
-      ─────────────────────────────────────────── */}
+      {/* ── KPIs ────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {kpis.map((kpi) => (
           <KpiCard key={kpi.label} {...kpi} />
         ))}
       </div>
 
-      {/* ── Graphiques ──────────────────────────────
-          Empilés sur mobile, côte à côte sur desktop
-      ─────────────────────────────────────────── */}
+      {/* ── Graphiques ──────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
 
-        {/* Pie chart — répartition par catégorie */}
+        {/* Pie chart */}
         <div className="rounded-[1.75rem] sm:rounded-[2rem] p-5 sm:p-6 md:p-8" style={cardStyle}>
           <div className="flex items-center gap-2.5 sm:gap-3 mb-5 sm:mb-8">
-            <PieIcon size={16} className="text-[#C8A050]" aria-hidden="true" />
-            <h3 className="text-xs sm:text-sm font-bold text-[#F2E8D8] uppercase tracking-tighter">
+            <PieIcon size={16} style={{ color: "var(--or)" }} aria-hidden="true" />
+            <h3
+              className="text-xs sm:text-sm font-bold uppercase tracking-tighter"
+              style={{ color: "var(--texte)" }}
+            >
               Répartition
             </h3>
           </div>
 
-          {/* Hauteur réduite sur mobile pour éviter le débordement */}
           <div className="h-[240px] sm:h-[280px] md:h-[320px] w-full">
-            {pieData.length === 0 ? (
-              <ChartEmpty />
-            ) : (
+            {pieData.length === 0 ? <ChartEmpty /> : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={pieData}
                     dataKey="total"
                     nameKey="category"
-                    cx="50%"
-                    cy="45%"
-                    innerRadius="40%"
-                    outerRadius="55%"
-                    paddingAngle={8}
-                    stroke="none"
+                    cx="50%" cy="45%"
+                    innerRadius="40%" outerRadius="55%"
+                    paddingAngle={8} stroke="none"
                   >
                     {pieData.map((entry) => (
                       <Cell
                         key={entry.category}
-                        fill={
-                          CATEGORY_COLORS[entry.category as keyof typeof CATEGORY_COLORS]
-                          ?? "#9A8060"
-                        }
+                        fill={CATEGORY_COLORS[entry.category as keyof typeof CATEGORY_COLORS] ?? "#9A8060"}
                       />
                     ))}
                   </Pie>
@@ -267,7 +265,10 @@ export default function StatsPage() {
                     iconType="circle"
                     iconSize={6}
                     formatter={(value) => (
-                      <span className="text-[9px] sm:text-[10px] text-[#9A8060] font-black uppercase px-1">
+                      <span
+                        className="text-[9px] sm:text-[10px] font-black uppercase px-1"
+                        style={{ color: "var(--muted)" }}
+                      >
                         {value}
                       </span>
                     )}
@@ -278,24 +279,22 @@ export default function StatsPage() {
           </div>
         </div>
 
-        {/* Bar chart — flux de trésorerie */}
+        {/* Bar chart */}
         <div className="rounded-[1.75rem] sm:rounded-[2rem] p-5 sm:p-6 md:p-8" style={cardStyle}>
           <div className="flex items-center gap-2.5 sm:gap-3 mb-5 sm:mb-8">
-            <BarChart3 size={16} className="text-[#C8A050]" aria-hidden="true" />
-            <h3 className="text-xs sm:text-sm font-bold text-[#F2E8D8] uppercase tracking-tighter">
+            <BarChart3 size={16} style={{ color: "var(--or)" }} aria-hidden="true" />
+            <h3
+              className="text-xs sm:text-sm font-bold uppercase tracking-tighter"
+              style={{ color: "var(--texte)" }}
+            >
               Flux de trésorerie
             </h3>
           </div>
 
           <div className="h-[240px] sm:h-[280px] md:h-[320px] w-full">
-            {barData.length === 0 ? (
-              <ChartEmpty />
-            ) : (
+            {barData.length === 0 ? <ChartEmpty /> : (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={barData}
-                  margin={{ top: 10, right: 4, left: -20, bottom: 0 }}
-                >
+                <BarChart data={barData} margin={{ top: 10, right: 4, left: -20, bottom: 0 }}>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="#3A2818"
@@ -304,15 +303,13 @@ export default function StatsPage() {
                   />
                   <XAxis
                     dataKey="month"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#9A8060", fontSize: 9, fontWeight: "900" }}
-                    // Intervalle auto sur mobile pour éviter l'overlap
+                    axisLine={false} tickLine={false}
+                    // fill hardcodé : recharts n'accepte pas CSS variables dans tick
+                    tick={{ fill: "#9A8060", fontSize: 9, fontWeight: 900 }}
                     interval="preserveStartEnd"
                   />
                   <YAxis
-                    axisLine={false}
-                    tickLine={false}
+                    axisLine={false} tickLine={false}
                     tick={{ fill: "#9A8060", fontSize: 9 }}
                     width={40}
                   />
@@ -322,20 +319,9 @@ export default function StatsPage() {
                     itemStyle={tooltipItemStyle}
                     formatter={(value: any) => [formatAmount(Number(value) || 0), ""]}
                   />
-                  <Bar
-                    dataKey="income"
-                    fill="#4A8A6A"
-                    radius={[4, 4, 0, 0]}
-                    barSize={10}
-                    name="Revenus"
-                  />
-                  <Bar
-                    dataKey="expenses"
-                    fill="#D4522A"
-                    radius={[4, 4, 0, 0]}
-                    barSize={10}
-                    name="Dépenses"
-                  />
+                  {/* fill SVG — CSS variables non supportées */}
+                  <Bar dataKey="income"   fill="#4A8A6A" radius={[4,4,0,0]} barSize={10} name="Revenus"  />
+                  <Bar dataKey="expenses" fill="#D4522A" radius={[4,4,0,0]} barSize={10} name="Dépenses" />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -343,34 +329,29 @@ export default function StatsPage() {
         </div>
       </div>
 
-      {/* ── Analyse par catégorie ────────────────────
-          1 colonne mobile, 2 colonnes desktop
-      ─────────────────────────────────────────── */}
-      <div
-        className="rounded-[1.75rem] sm:rounded-[2rem] p-5 sm:p-7 md:p-10"
-        style={cardStyle}
-      >
-        {/* Header section */}
+      {/* ── Analyse catégories ───────────────────── */}
+      <div className="rounded-[1.75rem] sm:rounded-[2rem] p-5 sm:p-7 md:p-10" style={cardStyle}>
         <div className="mb-6 sm:mb-10">
           <h3
-            className="text-base sm:text-lg font-bold text-[#F2E8D8] tracking-tight"
-            style={{ fontFamily: "var(--font-sora)" }}
+            className="text-base sm:text-lg font-bold tracking-tight"
+            style={{ color: "var(--texte)", fontFamily: "var(--font-sora)" }}
           >
             Analyse des sorties
           </h3>
-          <p className="text-[9px] sm:text-[11px] text-[#9A8060] mt-1 font-medium uppercase tracking-widest opacity-60">
+          <p
+            className="text-[9px] sm:text-[11px] mt-1 font-medium uppercase tracking-widest opacity-60"
+            style={{ color: "var(--muted)" }}
+          >
             Répartition du poids financier par poste
           </p>
         </div>
 
-        {/* Grille de barres */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 md:gap-x-16 gap-y-6 sm:gap-y-8">
           {CATEGORIES.filter((c) => c !== "Revenus").map((cat) => {
             const total = transactions
               .filter((t) => t.type === "expense" && t.category === cat)
               .reduce((acc, t) => acc + t.amount, 0);
-
-            const pct = totalExpenses > 0 ? (total / totalExpenses) * 100 : 0;
+            const pct   = totalExpenses > 0 ? (total / totalExpenses) * 100 : 0;
             const color = CATEGORY_COLORS[cat as keyof typeof CATEGORY_COLORS] ?? "#9A8060";
 
             return (

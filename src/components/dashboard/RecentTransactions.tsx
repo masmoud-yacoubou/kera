@@ -17,20 +17,28 @@ interface Props {
 
 // ─────────────────────────────────────────────
 // Sous-composant : ligne skeleton
-// Utilisé pendant le chargement initial
 // ─────────────────────────────────────────────
 function SkeletonRow() {
   return (
     <div className="flex items-center gap-3 p-3 sm:p-4 rounded-2xl">
-      {/* Avatar */}
-      <div className="w-10 h-10 rounded-xl animate-pulse shrink-0" style={{ background: "#251C1440" }} />
-      {/* Texte */}
+      <div
+        className="w-10 h-10 rounded-xl animate-pulse shrink-0"
+        style={{ background: "var(--bordure-40)" }}
+      />
       <div className="flex-1 space-y-2">
-        <div className="h-3 rounded-lg animate-pulse w-1/2" style={{ background: "#251C1440" }} />
-        <div className="h-2 rounded-lg animate-pulse w-1/4" style={{ background: "#1C140E40" }} />
+        <div
+          className="h-3 rounded-lg animate-pulse w-1/2"
+          style={{ background: "var(--bordure-40)" }}
+        />
+        <div
+          className="h-2 rounded-lg animate-pulse w-1/4"
+          style={{ background: "var(--bordure-20)" }}
+        />
       </div>
-      {/* Montant */}
-      <div className="h-3 w-16 rounded-lg animate-pulse" style={{ background: "#251C1440" }} />
+      <div
+        className="h-3 w-16 rounded-lg animate-pulse"
+        style={{ background: "var(--bordure-40)" }}
+      />
     </div>
   );
 }
@@ -43,14 +51,25 @@ function EmptyState() {
     <div className="flex flex-col items-center justify-center py-10 sm:py-14 gap-3">
       <div
         className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl sm:rounded-3xl flex items-center justify-center"
-        style={{ background: "#251C14", border: "1px solid #3A2818" }}
+        style={{
+          background: "var(--carte)",
+          border: "1px solid var(--bordure)",
+        }}
         aria-hidden="true"
       >
-        <Inbox size={22} className="text-[#9A8060]" />
+        <Inbox size={22} style={{ color: "var(--muted)" }} />
       </div>
       <div className="text-center">
-        <p className="text-xs font-bold text-[#9A8060]">Aucun mouvement</p>
-        <p className="text-[10px] text-[#9A8060]/50 mt-0.5">
+        <p
+          className="text-xs font-bold"
+          style={{ color: "var(--muted)" }}
+        >
+          Aucun mouvement
+        </p>
+        <p
+          className="text-[10px] mt-0.5"
+          style={{ color: "var(--muted)", opacity: 0.5 }}
+        >
           Ajoutez votre première transaction
         </p>
       </div>
@@ -60,8 +79,6 @@ function EmptyState() {
 
 // ─────────────────────────────────────────────
 // Sous-composant : ligne de transaction
-// Extrait pour la lisibilité et éviter la
-// répétition de logique dans le map parent
 // ─────────────────────────────────────────────
 function TransactionRow({
   transaction: t,
@@ -79,56 +96,60 @@ function TransactionRow({
   const color = CATEGORY_COLORS[t.category as keyof typeof CATEGORY_COLORS] ?? "#9A8060";
   const isIncome = t.type === "income";
 
-  // Couleurs des montants alignées sur la palette Sahara
-  // (remplacement de #00E676 / #FF4D4D trop saturés)
-  const amountColor = isIncome ? "#4A8A6A" : "#D4522A";
+  // Couleurs montants via variables de thème
+  const amountColor = isIncome ? "var(--succes)" : "var(--accent)";
 
   return (
     <div
       role="listitem"
       onClick={() => onEdit(t)}
-      className="group flex items-center gap-3 p-3 sm:p-4 rounded-2xl transition-all duration-200 border border-transparent hover:border-[#3A281840] cursor-pointer relative"
+      className="group flex items-center gap-3 p-3 sm:p-4 rounded-2xl transition-all duration-200 border border-transparent cursor-pointer relative"
       style={{ WebkitTapHighlightColor: "transparent" }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "#251C1460")}
-      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = "var(--bordure-40)";
+        e.currentTarget.style.borderColor = "var(--bordure-40)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "transparent";
+        e.currentTarget.style.borderColor = "transparent";
+      }}
       aria-label={`${t.label} — ${isIncome ? "+" : "−"}${formatAmount(t.amount)}`}
     >
       {/* ── Icône catégorie / confirmation ──────── */}
       <div
         className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200"
         style={{
-          background: isConfirming ? "rgba(239,68,68,0.1)" : `${color}10`,
-          border: `1px solid ${isConfirming ? "rgba(239,68,68,0.3)" : `${color}20`}`,
+          background: isConfirming ? "rgba(239,68,68,0.1)" : `${color}15`,
+          border: `1px solid ${isConfirming ? "rgba(239,68,68,0.3)" : `${color}25`}`,
         }}
         aria-hidden="true"
       >
         {isConfirming ? (
           <AlertCircle size={16} className="text-red-400 animate-pulse" />
         ) : isIncome ? (
-          <ArrowUpRight size={16} className="text-[#4A8A6A]" />
+          <ArrowUpRight  size={16} style={{ color: "var(--succes)" }} />
         ) : (
-          <ArrowDownRight size={16} className="text-[#D4522A]" />
+          <ArrowDownRight size={16} style={{ color: "var(--accent)" }} />
         )}
       </div>
 
       {/* ── Libellé + badge catégorie ────────────── */}
       <div className="flex-1 min-w-0">
         <p
-          className={`text-xs sm:text-sm font-bold truncate transition-colors ${
-            isConfirming ? "text-red-400" : "text-[#F2E8D8]"
-          }`}
+          className="text-xs sm:text-sm font-bold truncate transition-colors"
+          style={{ color: isConfirming ? "#f87171" : "var(--texte)" }}
         >
           {isConfirming ? "Supprimer ce flux ?" : t.label}
         </p>
 
-        {/* Badge catégorie — tronqué sur très petit écran */}
+        {/* Badge catégorie */}
         {!isConfirming && (
           <span
             className="inline-block mt-0.5 text-[8px] sm:text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded max-w-[120px] truncate"
             style={{
               color,
-              background: "#0E0B08",
-              border: "1px solid #3A281860",
+              background: "var(--fond)",
+              border: "1px solid var(--bordure-60)",
             }}
           >
             {t.category}
@@ -138,7 +159,8 @@ function TransactionRow({
 
       {/* ── Montant + bouton supprimer ───────────── */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        {/* Montant — masqué en mode confirmation */}
+
+        {/* Montant */}
         {!isConfirming && (
           <p
             className="text-xs sm:text-sm font-black tabular-nums"
@@ -150,9 +172,9 @@ function TransactionRow({
         )}
 
         {/* Bouton supprimer
-            - Mobile  : toujours visible (pas de hover)
-            - Desktop : apparaît au hover du groupe
-            - En confirmation : rouge plein avec texte
+            Mobile  : toujours visible
+            Desktop : apparaît au hover
+            Confirmation : rouge plein
         */}
         <button
           onClick={(e) => onDeleteClick(e, t.id)}
@@ -167,9 +189,10 @@ function TransactionRow({
             transition-all duration-200 min-h-[36px]
             ${isConfirming
               ? "bg-red-500 text-white shadow-lg shadow-red-500/20 px-3 sm:px-4"
-              : "w-9 h-9 text-[#9A8060] hover:bg-red-500/10 hover:text-red-400 sm:opacity-0 sm:group-hover:opacity-100"
+              : "w-9 h-9 hover:bg-red-500/10 hover:text-red-400 sm:opacity-0 sm:group-hover:opacity-100"
             }
           `}
+          style={!isConfirming ? { color: "var(--muted)" } : {}}
         >
           {isConfirming
             ? <span className="whitespace-nowrap">Confirmer</span>
@@ -191,9 +214,8 @@ const RecentTransactions = memo(function RecentTransactions({
   onDelete,
   onEdit,
 }: Props) {
-  // ── Confirmation de suppression ──────────────
-  // L'utilisateur doit cliquer deux fois pour supprimer
-  // Le timer annule la confirmation après 3 secondes
+  // ── Confirmation suppression ─────────────────
+  // Double-clic requis, annulation après 3s
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -202,13 +224,10 @@ const RecentTransactions = memo(function RecentTransactions({
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => setConfirmingId(null), 3000);
     }
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [confirmingId]);
 
   const handleDeleteClick = (e: React.MouseEvent, id: string) => {
-    // Stoppe la propagation pour ne pas déclencher onEdit
     e.stopPropagation();
     if (confirmingId === id) {
       onDelete(id);
@@ -222,45 +241,55 @@ const RecentTransactions = memo(function RecentTransactions({
     <div
       className="rounded-[2rem] p-4 sm:p-6 md:p-8 h-full transition-all duration-500"
       style={{
-        background: "linear-gradient(145deg, #1C1610 0%, #161008 100%)",
-        border: "1px solid #3A281830",
-        boxShadow: "0 20px 40px rgba(0,0,0,0.4)",
+        background: "linear-gradient(145deg, var(--carte) 0%, var(--carte-2) 100%)",
+        border: "1px solid var(--bordure-30)",
+        boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
       }}
     >
       {/* ── Header ──────────────────────────────── */}
       <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8 px-1">
         <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* Icône */}
+
+          {/* Icône horloge */}
           <div
             className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "#C8A05008", border: "1px solid #C8A05020" }}
+            style={{
+              background: "var(--or-08)",
+              border: "1px solid var(--or-20)",
+            }}
             aria-hidden="true"
           >
-            <Clock size={15} className="text-[#C8A050]" />
+            <Clock size={15} style={{ color: "var(--or)" }} />
           </div>
 
           {/* Titre */}
           <div>
             <h3
-              className="text-sm font-bold text-[#F2E8D8] tracking-tight leading-tight"
-              style={{ fontFamily: "var(--font-sora)" }}
+              className="text-sm font-bold tracking-tight leading-tight"
+              style={{
+                color: "var(--texte)",
+                fontFamily: "var(--font-sora)",
+              }}
             >
               Activités
             </h3>
-            <p className="text-[9px] text-[#9A8060] font-black uppercase tracking-[0.15em] opacity-50">
+            <p
+              className="text-[9px] font-black uppercase tracking-[0.15em] opacity-50"
+              style={{ color: "var(--muted)" }}
+            >
               Flux récents
             </p>
           </div>
         </div>
 
-        {/* Compteur — visible uniquement si des transactions existent */}
+        {/* Compteur de transactions */}
         {!loading && transactions.length > 0 && (
           <span
             className="text-[10px] font-black tabular-nums px-2.5 py-1 rounded-xl"
             style={{
-              background: "#C8A05010",
-              color: "#C8A050",
-              border: "1px solid #C8A05020",
+              background: "var(--or-10)",
+              color: "var(--or)",
+              border: "1px solid var(--or-20)",
             }}
             aria-label={`${transactions.length} transactions`}
           >
@@ -269,7 +298,7 @@ const RecentTransactions = memo(function RecentTransactions({
         )}
       </div>
 
-      {/* ── Contenu ─────────────────────────────── */}
+      {/* ── Liste ────────────────────────────────── */}
       <div
         role="list"
         aria-label="Liste des transactions récentes"
@@ -277,7 +306,6 @@ const RecentTransactions = memo(function RecentTransactions({
         className="space-y-0.5"
       >
         {loading ? (
-          // Skeleton — 4 lignes pendant le chargement
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)
         ) : transactions.length === 0 ? (
           <EmptyState />

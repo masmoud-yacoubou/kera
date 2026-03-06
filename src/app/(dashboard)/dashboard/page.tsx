@@ -14,44 +14,49 @@ import { Sparkles, LayoutDashboard, Settings, X } from "lucide-react";
 import Link from "next/link";
 
 // ─────────────────────────────────────────────
-// Constante : clé localStorage pour le banner
-// Modifier cette clé forcera le banner à réapparaître
-// pour tous les utilisateurs (utile après une mise à jour)
+// Clé localStorage du banner paramètres
+// Changer la version force le banner à réapparaître
 // ─────────────────────────────────────────────
 const SETTINGS_BANNER_KEY = "kera_settings_banner_v1";
 
 // ─────────────────────────────────────────────
-// Composant : Banner de notification paramètres
-// Affiché une seule fois par utilisateur
-// Disparaît définitivement après fermeture
+// Sous-composant : Banner paramètres
+// Affiché une seule fois, fermé définitivement
 // ─────────────────────────────────────────────
 function SettingsBanner({ onDismiss }: { onDismiss: () => void }) {
   return (
     <div
       className="relative flex items-center gap-4 px-5 py-4 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-500"
       style={{
-        background: "linear-gradient(135deg, #C8A05015 0%, #D4522A10 100%)",
-        border: "1px solid #C8A05030",
+        background: "linear-gradient(135deg, var(--or-15) 0%, var(--accent-10) 100%)",
+        border: "1px solid var(--or-30)",
       }}
+      role="status"
+      aria-live="polite"
     >
       {/* Icône */}
       <div
         className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-        style={{ background: "#C8A05020", border: "1px solid #C8A05030" }}
+        style={{
+          background: "var(--or-20)",
+          border: "1px solid var(--or-30)",
+        }}
+        aria-hidden="true"
       >
-        <Settings size={16} className="text-[#C8A050]" />
+        <Settings size={16} style={{ color: "var(--or)" }} />
       </div>
 
       {/* Texte */}
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-bold text-[#F2E8D8]">
+        <p className="text-xs font-bold" style={{ color: "var(--texte)" }}>
           Personnalisez votre expérience
         </p>
-        <p className="text-[11px] text-[#9A8060] mt-0.5">
+        <p className="text-[11px] mt-0.5" style={{ color: "var(--muted)" }}>
           Choisissez votre devise et vos préférences dans{" "}
           <Link
             href="/parametres"
-            className="text-[#C8A050] hover:text-[#D4B860] underline underline-offset-2 transition-colors font-semibold"
+            className="underline underline-offset-2 transition-colors font-semibold"
+            style={{ color: "var(--or)" }}
           >
             Paramètres
           </Link>
@@ -61,11 +66,16 @@ function SettingsBanner({ onDismiss }: { onDismiss: () => void }) {
       {/* Bouton fermer */}
       <button
         onClick={onDismiss}
-        className="w-7 h-7 rounded-lg flex items-center justify-center text-[#9A8060] hover:text-[#F2E8D8] transition-colors shrink-0"
-        style={{ background: "#3A281840" }}
         aria-label="Fermer la notification"
+        className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0 min-h-[44px] min-w-[44px]"
+        style={{
+          background: "var(--bordure-40)",
+          color: "var(--muted)",
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.color = "var(--texte)"}
+        onMouseLeave={(e) => e.currentTarget.style.color = "var(--muted)"}
       >
-        <X size={13} />
+        <X size={13} aria-hidden="true" />
       </button>
     </div>
   );
@@ -77,8 +87,7 @@ function SettingsBanner({ onDismiss }: { onDismiss: () => void }) {
 export default function DashboardPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
-  // ── État du banner paramètres ──────────────
-  // Pattern lazy: initialise une seule fois côté client
+  // ── Banner — initialisé une seule fois côté client ──
   const [showSettingsBanner, setShowSettingsBanner] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return !localStorage.getItem(SETTINGS_BANNER_KEY);
@@ -96,52 +105,52 @@ export default function DashboardPage() {
 
   const { formatAmount } = usePreferences();
 
-  // ── Fermeture définitive du banner ──────────
   const dismissSettingsBanner = () => {
     localStorage.setItem(SETTINGS_BANNER_KEY, "true");
     setShowSettingsBanner(false);
-  };
-
-  // ── Style de carte réutilisable ──────────────
-  const cardStyle = {
-    background: "linear-gradient(145deg, #1C1610, #1A1410)",
-    border: "1px solid #3A281830",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
   };
 
   return (
     <>
       <div className="max-w-6xl mx-auto px-4 md:px-8 space-y-6 md:space-y-8 pb-32 pt-4">
 
-        {/* ── Banner paramètres ──────────────────
-            Affiché uniquement si l'utilisateur ne l'a
-            pas encore fermé (vérifié via localStorage)
-        ─────────────────────────────────────────── */}
-        {showSettingsBanner === true && (
+        {/* ── Banner paramètres ──────────────────── */}
+        {showSettingsBanner && (
           <SettingsBanner onDismiss={dismissSettingsBanner} />
         )}
 
-        {/* ── En-tête de section ─────────────────
-            Visible uniquement quand des transactions
-            existent, pour éviter le bruit visuel
-        ─────────────────────────────────────────── */}
+        {/* ── En-tête de section ─────────────────── */}
         {!loading && transactions.length > 0 && (
           <div className="flex items-center gap-2.5 px-1 animate-in fade-in slide-in-from-left duration-700">
-            <div className="w-6 h-6 rounded-lg bg-[#C8A05010] flex items-center justify-center border border-[#C8A05020]">
-              <Sparkles size={12} className="text-[#C8A050]" />
+            <div
+              className="w-6 h-6 rounded-lg flex items-center justify-center"
+              style={{
+                background: "var(--or-10)",
+                border: "1px solid var(--or-20)",
+              }}
+              aria-hidden="true"
+            >
+              <Sparkles size={12} style={{ color: "var(--or)" }} />
             </div>
-            <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#9A8060] opacity-80">
+            <p
+              className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] opacity-80"
+              style={{ color: "var(--muted)" }}
+            >
               Analyse de performance financière
             </p>
           </div>
         )}
 
-        {/* ── Carte de solde ─────────────────────
-            Pièce maîtresse du dashboard
-            L'anneau de glow réagit au hover du groupe
-        ─────────────────────────────────────────── */}
+        {/* ── Carte de solde ─────────────────────── */}
         <section className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-[#D4522A10] to-[#C8A05010] rounded-[2.5rem] blur-2xl opacity-40 group-hover:opacity-60 transition duration-1000 pointer-events-none" />
+          {/* Halo de glow — réagit au hover */}
+          <div
+            className="absolute -inset-1 rounded-[2.5rem] blur-2xl opacity-40 group-hover:opacity-60 transition duration-1000 pointer-events-none"
+            style={{
+              background: "linear-gradient(to right, var(--accent-10), var(--or-10))",
+            }}
+            aria-hidden="true"
+          />
           <div className="relative">
             <BalanceCard
               balance={balance}
@@ -153,12 +162,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* ── Grille principale ──────────────────
-            - Mobile  : 1 colonne, graphiques en haut
-            - Desktop : 12 colonnes, transactions à gauche
-            L'ordre CSS (order-X) inverse la priorité visuelle
-            entre mobile et desktop sans dupliquer le JSX
-        ─────────────────────────────────────────── */}
+        {/* ── Grille principale ──────────────────── */}
         {!loading && transactions.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
 
@@ -193,46 +197,77 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* ── Skeleton loading ───────────────────
-            Affiché pendant le chargement initial
-            pour éviter le layout shift
-        ─────────────────────────────────────────── */}
+        {/* ── Skeleton loading ───────────────────── */}
         {loading && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-7 h-64 rounded-3xl animate-pulse" style={{ background: "#1C1610" }} />
+            <div
+              className="lg:col-span-7 h-64 rounded-3xl animate-pulse"
+              style={{ background: "var(--carte)" }}
+            />
             <div className="lg:col-span-5 space-y-6">
-              <div className="h-48 rounded-3xl animate-pulse" style={{ background: "#1C1610" }} />
-              <div className="h-48 rounded-3xl animate-pulse" style={{ background: "#1C1610" }} />
+              <div
+                className="h-48 rounded-3xl animate-pulse"
+                style={{ background: "var(--carte)" }}
+              />
+              <div
+                className="h-48 rounded-3xl animate-pulse"
+                style={{ background: "var(--carte)" }}
+              />
             </div>
           </div>
         )}
 
-        {/* ── Empty state ────────────────────────
-            Affiché uniquement si aucune transaction
-            et que le chargement est terminé
-        ─────────────────────────────────────────── */}
+        {/* ── Empty state ────────────────────────── */}
         {!loading && transactions.length === 0 && (
           <div
             className="rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden"
-            style={cardStyle}
+            style={{
+              background: "linear-gradient(145deg, var(--carte), var(--surface))",
+              border: "1px solid var(--bordure-30)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+            }}
           >
-            <div className="w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 bg-[#1A1410] border border-[#3A2818] shadow-inner">
-              <LayoutDashboard size={32} className="text-[#C8A050] opacity-40" />
+            {/* Icône */}
+            <div
+              className="w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner"
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--bordure)",
+              }}
+              aria-hidden="true"
+            >
+              <LayoutDashboard
+                size={32}
+                style={{ color: "var(--or)", opacity: 0.4 }}
+              />
             </div>
 
             <h2
-              className="text-2xl md:text-3xl font-black text-[#F2E8D8] mb-4 tracking-tight"
-              style={{ fontFamily: "var(--font-sora)" }}
+              className="text-2xl md:text-3xl font-black mb-4 tracking-tight"
+              style={{
+                color: "var(--texte)",
+                fontFamily: "var(--font-sora)",
+              }}
             >
               Prêt à piloter ?
             </h2>
-            <p className="text-sm md:text-base text-[#9A8060] max-w-sm mx-auto leading-relaxed font-medium">
-              Votre cockpit financier est configuré. Il ne manque plus que vos premières données pour générer vos analyses.
+            <p
+              className="text-sm md:text-base max-w-sm mx-auto leading-relaxed font-medium"
+              style={{ color: "var(--muted)" }}
+            >
+              Votre cockpit financier est configuré. Il ne manque plus que vos
+              premières données pour générer vos analyses.
             </p>
 
             <button
               onClick={() => setModalOpen(true)}
-              className="mt-10 px-10 py-4 rounded-2xl bg-[#D4522A] text-white text-xs font-black uppercase tracking-[0.2em] shadow-2xl shadow-[#D4522A]/25 hover:bg-[#E85D35] transition-all hover:scale-105 active:scale-95"
+              className="mt-10 px-10 py-4 rounded-2xl text-white text-xs font-black uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 min-h-[48px]"
+              style={{
+                background: "var(--accent)",
+                boxShadow: "0 20px 40px var(--accent-20)",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = "0.9"}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
             >
               Lancer ma première saisie
             </button>
@@ -240,15 +275,10 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* ── FAB ────────────────────────────────
-          Toujours visible, indépendant du scroll
-      ─────────────────────────────────────────── */}
+      {/* FAB — toujours visible */}
       <FAB onClick={() => setModalOpen(true)} />
 
-      {/* ── Modal de transaction ────────────────
-          Contrôlé par modalOpen
-          onSubmit ajoute et ferme automatiquement
-      ─────────────────────────────────────────── */}
+      {/* Modal de transaction */}
       <TransactionModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}

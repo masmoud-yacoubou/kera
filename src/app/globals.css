@@ -1,61 +1,152 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────
+   Fonts & radius — statiques, dans @theme
+   Ces valeurs ne changent jamais selon le thème
+───────────────────────────────────────────── */
 @theme {
-  --font-sora: "Sora", sans-serif;
+  --font-sora:    "Sora", sans-serif;
   --font-jakarta: "Plus Jakarta Sans", sans-serif;
 
-  /* ── Sahara Premium ── */
-  --color-fond:        #0E0B08;
-  --color-surface:     #1A1410;
-  --color-carte:       #251C14;
-  --color-bordure:     #3A2818;
-  --color-accent:      #D4522A;
-  --color-accent-soft: #D4522A26;
-  --color-or:          #C8A050;
-  --color-or-soft:     #C8A05020;
-  --color-succes:      #4A8A6A;
-  --color-succes-soft: #4A8A6A20;
-  --color-texte:       #F2E8D8;
-  --color-muted:       #9A8060;
-  --color-muted-soft:  #9A806040;
-
-  /* Graphiques */
-  --color-terracotta:  #D4522A;
-  --color-sage:        #4A8A6A;
-  --color-moutarde:    #C8A050;
-  --color-lavande:     #8B85C1;
-  --color-ardoise:     #6B8CAE;
-
-  /* Radius */
   --radius-2xl: 16px;
   --radius-3xl: 24px;
+
+  /* Couleurs graphiques — statiques */
+  --color-terracotta: #D4522A;
+  --color-sage:       #4A8A6A;
+  --color-moutarde:   #C8A050;
+  --color-lavande:    #8B85C1;
+  --color-ardoise:    #6B8CAE;
 }
 
-/* Scrollbar premium */
+/* ─────────────────────────────────────────────
+   Thème sombre — défaut
+   Palette Sahara Premium warm dark
+───────────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --fond:        #0E0B08;
+  --surface:     #1A1410;
+  --carte:       #1C1610;
+  --carte-2:     #161008;
+  --bordure:     #3A2818;
+
+  --accent:      #D4522A;
+  --accent-soft: #D4522A26;
+  --accent-10:   #D4522A10;
+  --accent-15:   #D4522A15;
+  --accent-20:   #D4522A20;
+
+  --or:          #C8A050;
+  --or-soft:     #C8A05020;
+  --or-08:       #C8A05008;
+  --or-10:       #C8A05010;
+  --or-15:       #C8A05015;
+  --or-20:       #C8A05020;
+  --or-30:       #C8A05030;
+
+  --succes:      #4A8A6A;
+  --succes-soft: #4A8A6A20;
+
+  --texte:       #F2E8D8;
+  --muted:       #9A8060;
+  --muted-soft:  #9A806040;
+
+  --fond-40:     rgba(14, 11, 8, 0.40);
+  --bordure-20:  rgba(58, 40, 24, 0.20);
+  --bordure-30:  rgba(58, 40, 24, 0.30);
+  --bordure-40:  rgba(58, 40, 24, 0.40);
+  --bordure-50:  rgba(58, 40, 24, 0.50);
+  --bordure-60:  rgba(58, 40, 24, 0.60);
+
+  /* Fond body */
+  --body-bg:     #0E0B08;
+  --body-radial-1: #D4522A08;
+  --body-radial-2: #C8A05006;
+
+  /* Scrollbar */
+  --scroll-track: #1A1410;
+  --scroll-thumb: #3A2818;
+  --scroll-hover: #C8A050;
+
+  /* Sélection */
+  --selection-bg: #D4522A40;
+}
+
+/* ─────────────────────────────────────────────
+   Thème clair — Sahara Light
+   Tons sable chaud, lisible et doux
+───────────────────────────────────────────── */
+[data-theme="light"] {
+  --fond:        #FAF6F0;
+  --surface:     #F2EBE0;
+  --carte:       #FFFFFF;
+  --carte-2:     #F7F1E8;
+  --bordure:     #D4C4A8;
+
+  --accent:      #C04020;
+  --accent-soft: #C0402026;
+  --accent-10:   #C0402010;
+  --accent-15:   #C0402015;
+  --accent-20:   #C0402020;
+
+  --or:          #A07830;
+  --or-soft:     #A0783020;
+  --or-08:       #A0783008;
+  --or-10:       #A0783010;
+  --or-15:       #A0783015;
+  --or-20:       #A0783020;
+  --or-30:       #A0783030;
+
+  --succes:      #2E6B50;
+  --succes-soft: #2E6B5020;
+
+  --texte:       #1C1008;
+  --muted:       #6A5040;
+  --muted-soft:  #6A504040;
+
+  --fond-40:     rgba(250, 246, 240, 0.40);
+  --bordure-20:  rgba(212, 196, 168, 0.20);
+  --bordure-30:  rgba(212, 196, 168, 0.30);
+  --bordure-40:  rgba(212, 196, 168, 0.40);
+  --bordure-50:  rgba(212, 196, 168, 0.50);
+  --bordure-60:  rgba(212, 196, 168, 0.60);
+
+  --body-bg:     #FAF6F0;
+  --body-radial-1: #C0402008;
+  --body-radial-2: #A0783006;
+
+  --scroll-track: #F2EBE0;
+  --scroll-thumb: #D4C4A8;
+  --scroll-hover: #A07830;
+
+  --selection-bg: #C0402040;
+}
+
+/* ─────────────────────────────────────────────
+   Scrollbar — utilise les variables de thème
+───────────────────────────────────────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3A2818 #1A1410;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
 }
 
-*::-webkit-scrollbar {
-  width: 6px;
-}
-
-*::-webkit-scrollbar-track {
-  background: #1A1410;
-}
+*::-webkit-scrollbar       { width: 6px; }
+*::-webkit-scrollbar-track { background: var(--scroll-track); }
 
 *::-webkit-scrollbar-thumb {
-  background: #3A2818;
+  background: var(--scroll-thumb);
   border-radius: 999px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #C8A050;
+  background: var(--scroll-hover);
 }
 
-/* Sélection de texte */
+/* ─────────────────────────────────────────────
+   Sélection de texte
+───────────────────────────────────────────── */
 ::selection {
-  background: #D4522A40;
-  color: #F2E8D8;
+  background: var(--selection-bg);
+  color: var(--texte);
 }

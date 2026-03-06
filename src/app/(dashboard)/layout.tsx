@@ -20,10 +20,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Fermée par défaut sur mobile, ouverte sur desktop
-  // La détection se fait dans Sidebar via CSS (hidden lg:flex)
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 
   return (
@@ -31,10 +28,10 @@ export default function DashboardLayout({
       <div
         className="min-h-screen flex"
         style={{
-          background: "#0E0B08",
+          background: "var(--fond)",
           backgroundImage: `
-            radial-gradient(ellipse at 0% 0%,   #D4522A0A 0%, transparent 40%),
-            radial-gradient(ellipse at 100% 100%, #C8A05006 0%, transparent 40%)
+            radial-gradient(ellipse at 0%   0%,   var(--accent-10) 0%, transparent 40%),
+            radial-gradient(ellipse at 100% 100%, var(--or-08)     0%, transparent 40%)
           `,
         }}
       >
@@ -51,7 +48,7 @@ export default function DashboardLayout({
           <main
             className="flex-1 p-4 md:p-6 overflow-auto"
             style={{
-              backgroundImage: `radial-gradient(ellipse at 50% 0%, #C8A05005 0%, transparent 60%)`,
+              backgroundImage: `radial-gradient(ellipse at 50% 0%, var(--or-08) 0%, transparent 60%)`,
             }}
           >
             {children}

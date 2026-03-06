@@ -1,7 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Sora, Plus_Jakarta_Sans } from "next/font/google";
-import "./globals.css"; // <-- Vérifie bien que ce fichier existe dans src/app/
+import { ThemeProvider } from "next-themes";
+import "./globals.css";
 
+// ─────────────────────────────────────────────
+// Fonts Google — chargées via Next.js
+// Les variables CSS sont injectées dans <html>
+// ─────────────────────────────────────────────
 const sora = Sora({
   subsets: ["latin"],
   variable: "--font-sora",
@@ -14,15 +19,27 @@ const jakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-// Configuration viewport séparée (Recommandé pour Next.js 14+)
+// ─────────────────────────────────────────────
+// Viewport — séparé de metadata (Next.js 14+)
+// userScalable: false évite le zoom accidentel
+// sur mobile mais nuit à l'accessibilité —
+// à reconsidérer si des utilisateurs malvoyants
+// utilisent l'app
+// ─────────────────────────────────────────────
 export const viewport: Viewport = {
-  themeColor: "#0E0B08",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)",  color: "#0E0B08" },
+    { media: "(prefers-color-scheme: light)", color: "#FAF6F0" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
 };
 
+// ─────────────────────────────────────────────
+// Metadata — SEO + PWA
+// ─────────────────────────────────────────────
 export const metadata: Metadata = {
   title: "Kera — Gestion financière",
   description: "La maîtrise sereine de vos finances personnelles",
@@ -38,19 +55,49 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// ─────────────────────────────────────────────
+// Layout racine
+//
+// suppressHydrationWarning est requis par
+// next-themes pour éviter les erreurs
+// d'hydratation liées au thème initial
+// ─────────────────────────────────────────────
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="fr" className={`${sora.variable} ${jakarta.variable}`} suppressHydrationWarning>
+    <html
+      lang="fr"
+      className={`${sora.variable} ${jakarta.variable}`}
+      suppressHydrationWarning
+    >
       <body
-        className="font-jakarta bg-[#0E0B08] text-[#F2E8D8] antialiased min-h-screen"
+        className="font-jakarta antialiased min-h-screen"
         style={{
+          background: "var(--body-bg)",
+          color: "var(--texte)",
           backgroundImage: `
-            radial-gradient(ellipse at 20% 0%, #D4522A08 0%, transparent 50%),
-            radial-gradient(ellipse at 80% 100%, #C8A05006 0%, transparent 50%)
+            radial-gradient(ellipse at 20% 0%,   var(--body-radial-1) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 100%, var(--body-radial-2) 0%, transparent 50%)
           `,
         }}
       >
-        {children}
+        {/* ThemeProvider — gère data-theme sur <html>
+            defaultTheme: dark (Sahara Premium)
+            enableSystem: false — pas de détection OS
+            storageKey: permet de persister le choix
+        */}
+        <ThemeProvider
+          attribute="data-theme"
+          defaultTheme="dark"
+          enableSystem={false}
+          themes={["dark", "light"]}
+          storageKey="kera-theme"
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
